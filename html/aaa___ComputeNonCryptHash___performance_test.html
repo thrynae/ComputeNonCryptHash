@@ -1,0 +1,1796 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ComputeNonCryptHash performance test</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-11-10"><meta name="DC.source" content="ComputeNonCryptHash_performance.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>ComputeNonCryptHash performance test</h1><!--introduction--><p><tt style="font-size:0%">Performance test for the ComputeNonCryptHash function.</tt>
+<div style="margin-top:-5em;color:grey">Compute a non-cryptographic hash
+</div><br>
+The test at the bottom of this page was used to determine the performance of the
+ComputeNonCryptHash function. The test results shown in the tables below are normalized to the
+results of the newest Matlab release on Windows, since the performace is strongly dependent on
+the specific computer running the test. To allow absolute comparisons as well the results in that
+cell are shown in seconds.
+<br>
+<br>Note that Ubuntu and MacOS results were obtained in a VM, so the performance is likely an
+underestimation of the true performance.
+<br>
+<br>The results below were determined with the default setting of 256 bits. Performance does not
+scale linearly with the number of bits.
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">10000 English words</a></li><li><a href="#2">1 to 1e4 (in char format)</a></li><li><a href="#3">1 to 1e4 (in double format)</a></li><li><a href="#4">1 to 1e4 (in uint16 format)</a></li><li><a href="#5">25 images</a></li><li><a href="#6">Complete test run</a></li></ul></div><h2 id="1">10000 English words</h2><p>
+<table>
+<tr>
+<td> Normalized timing </td>
+<td style="border:2px solid black;"> Windows 10 </td>
+<td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+<td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2020b </td>
+<td> <it>(0.601 seconds)</it> </td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2018a </td>
+<td> 118% </td>
+<td> 106% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2015a </td>
+<td> 921% </td>
+<td> 825% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2011a </td>
+<td> 602% </td>
+<td> 575% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+<td> 389% </td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 5.2.0 </td>
+<td> 1&thinsp;690% </td>
+<td> 1&thinsp;263% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 4.4.1 </td>
+<td> 1&thinsp;702% </td>
+<td>-</td>
+<td> 2&thinsp;858% </td>
+</tr>
+</table>
+</p><pre class="codeinput"><span class="keyword">function</span> [timing,description]=test_1
+description=<span class="string">'%d English words'</span>;
+N=10000;
+Words=get_persistent(<span class="string">'Words'</span>,<span class="string">'load'</span>,N);
+then=now;<span class="keyword">for</span> n=1:N,ComputeNonCryptHash(Words{n},128);<span class="keyword">end</span>,timing=(now-then)*(24*60*60);
+description=sprintf(description,N);
+<span class="keyword">end</span>
+</pre><h2 id="2">1 to 1e4 (in char format)</h2><p>
+<table>
+<tr>
+<td> Normalized timing </td>
+<td style="border:2px solid black;"> Windows 10 </td>
+<td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+<td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2020b </td>
+<td> <it>(0.580 seconds)</it> </td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2018a </td>
+<td> 115% </td>
+<td> 107% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2015a </td>
+<td> 952% </td>
+<td> 854% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2011a </td>
+<td> 630% </td>
+<td> 597% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+<td> 393% </td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 5.2.0 </td>
+<td> 1&thinsp;765% </td>
+<td> 1&thinsp;312% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 4.4.1 </td>
+<td> 1&thinsp;768% </td>
+<td>-</td>
+<td> 2&thinsp;974% </td>
+</tr>
+</table>
+</p><pre class="codeinput"><span class="keyword">function</span> [timing,description]=test_2
+description=<span class="string">'1 to 1e%d (in char format)'</span>;
+E=4;
+<span class="keyword">persistent</span> Numbers N
+<span class="keyword">if</span> isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=cell(1,N);
+    <span class="keyword">for</span> n=1:numel(Numbers),Numbers{n}=sprintf(<span class="string">'%d'</span>,n);<span class="keyword">end</span>
+<span class="keyword">end</span>
+then=now;<span class="keyword">for</span> n=1:N,ComputeNonCryptHash(Numbers{n},128);<span class="keyword">end</span>,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+<span class="keyword">end</span>
+</pre><h2 id="3">1 to 1e4 (in double format)</h2><p>
+<table>
+<tr>
+<td> Normalized timing </td>
+<td style="border:2px solid black;"> Windows 10 </td>
+<td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+<td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2020b </td>
+<td> <it>(0.652 seconds)</it> </td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2018a </td>
+<td> 113% </td>
+<td> 105% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2015a </td>
+<td> 860% </td>
+<td> 772% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2011a </td>
+<td> 569% </td>
+<td> 543% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+<td> 376% </td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 5.2.0 </td>
+<td> 1&thinsp;576% </td>
+<td> 1&thinsp;173% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 4.4.1 </td>
+<td> 1&thinsp;587% </td>
+<td>-</td>
+<td> 2&thinsp;679% </td>
+</tr>
+</table>
+</p><pre class="codeinput"><span class="keyword">function</span> [timing,description]=test_3
+description=<span class="string">'1 to 1e%d (in double format)'</span>;
+E=4;
+<span class="keyword">persistent</span> Numbers N
+<span class="keyword">if</span> isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=num2cell(1:N);
+<span class="keyword">end</span>
+then=now;<span class="keyword">for</span> n=1:N,ComputeNonCryptHash(Numbers{n},128);<span class="keyword">end</span>,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+<span class="keyword">end</span>
+</pre><h2 id="4">1 to 1e4 (in uint16 format)</h2><p>
+<table>
+<tr>
+<td> Normalized timing </td>
+<td style="border:2px solid black;"> Windows 10 </td>
+<td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+<td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2020b </td>
+<td> <it>(0.476 seconds)</it> </td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2018a </td>
+<td> 117% </td>
+<td> 102% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2015a </td>
+<td> 1&thinsp;079% </td>
+<td> 945% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2011a </td>
+<td> 701% </td>
+<td> 648% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+<td> 423% </td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 5.2.0 </td>
+<td> 1&thinsp;495% </td>
+<td> 1&thinsp;103% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 4.4.1 </td>
+<td> 1&thinsp;500% </td>
+<td>-</td>
+<td> 2&thinsp;521% </td>
+</tr>
+</table>
+</p><pre class="codeinput"><span class="keyword">function</span> [timing,description]=test_4
+description=<span class="string">'1 to 1e%d (in uint16 format)'</span>;
+E=4;
+<span class="keyword">persistent</span> Numbers N
+<span class="keyword">if</span> isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=num2cell(uint16(1:N));
+<span class="keyword">end</span>
+then=now;<span class="keyword">for</span> n=1:N,ComputeNonCryptHash(Numbers{n},128);<span class="keyword">end</span>,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+<span class="keyword">end</span>
+</pre><h2 id="5">25 images</h2><p>
+<table>
+<tr>
+<td> Normalized timing </td>
+<td style="border:2px solid black;"> Windows 10 </td>
+<td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+<td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2020b </td>
+<td> <it>(1.815 seconds)</it> </td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2018a </td>
+<td> 102% </td>
+<td> 91% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2015a </td>
+<td> 118% </td>
+<td> 109% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2011a </td>
+<td> 147% </td>
+<td> 107% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+<td> 945% </td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 5.2.0 </td>
+<td> 217% </td>
+<td> 110% </td>
+<td>-</td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 4.4.1 </td>
+<td> 198% </td>
+<td>-</td>
+<td> 183% </td>
+</tr>
+</table>
+</p><pre class="codeinput"><span class="keyword">function</span> [timing,description]=test_5
+description=<span class="string">'%d images'</span>;
+N=25;
+IM=get_persistent(<span class="string">'IM'</span>,<span class="string">'load'</span>,N);
+then=now;<span class="keyword">for</span> n=1:N,ComputeNonCryptHash(IM{n},128);<span class="keyword">end</span>,timing=(now-then)*(24*60*60);
+description=sprintf(description,N);
+<span class="keyword">end</span>
+</pre><h2 id="6">Complete test run</h2><p>If you want to compare the documented performance with the performance on your own computer, you can run the code below.</p><pre class="codeinput"><span class="keyword">function</span> [timing,description]=ComputeNonCryptHash_performance
+<span class="comment">%This tester requires internet access to create files that will be loaded to persistent variables.</span>
+<span class="comment">%</span>
+<span class="comment">%The list of words is based on this list:</span>
+<span class="comment">%http://web.archive.org/web/20061231134037/http://www.sitopreferito.it/html/all_english_words.html</span>
+<span class="comment">%</span>
+<span class="comment">%The images are from the Stanford Dog Dataset containing 20580 images (with 89 duplicates)</span>
+<span class="comment">%         http://vision.stanford.edu/aditya86/ImageNetDogs/</span>
+
+n_tests=5;timing=zeros(4,n_tests);
+description=cell(1,n_tests);
+<span class="keyword">if</span> nargout==0,k=0;K=numel(timing);h_wait=waitbar(0,<span class="string">'progress'</span>);<span class="keyword">end</span>
+<span class="keyword">for</span> n=1:size(timing,1)
+    [timing(n,1),description{1}]=test_1;
+    <span class="keyword">if</span> nargout==0,k=k+1;waitbar(k/K,h_wait);<span class="keyword">end</span>
+    [timing(n,2),description{2}]=test_2;
+    <span class="keyword">if</span> nargout==0,k=k+1;waitbar(k/K,h_wait);<span class="keyword">end</span>
+    [timing(n,3),description{3}]=test_3;
+    <span class="keyword">if</span> nargout==0,k=k+1;waitbar(k/K,h_wait);<span class="keyword">end</span>
+    [timing(n,4),description{4}]=test_4;
+    <span class="keyword">if</span> nargout==0,k=k+1;waitbar(k/K,h_wait);<span class="keyword">end</span>
+    [timing(n,5),description{5}]=test_5;
+    <span class="keyword">if</span> nargout==0,k=k+1;waitbar(k/K,h_wait);<span class="keyword">end</span>
+<span class="keyword">end</span>
+get_persistent([],<span class="string">'clear'</span>);
+timing=median(timing(2:end,:),1);
+<span class="keyword">if</span> nargout==0
+    delete(h_wait)
+    fprintf(<span class="string">'Timing results:\n'</span>)
+    <span class="keyword">for</span> k=1:numel(timing),fprintf(<span class="string">'%.3f seconds (test: %s)\n'</span>,timing(k),description{k});<span class="keyword">end</span>
+    clear <span class="string">timing</span> <span class="string">description</span>
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [timing,description]=test_1
+description=<span class="string">'%d English words'</span>;
+N=10000;
+Words=get_persistent(<span class="string">'Words'</span>,<span class="string">'load'</span>,N);
+then=now;<span class="keyword">for</span> n=1:N,ComputeNonCryptHash(Words{n},128);<span class="keyword">end</span>,timing=(now-then)*(24*60*60);
+description=sprintf(description,N);
+<span class="keyword">end</span>
+<span class="keyword">function</span> [timing,description]=test_2
+description=<span class="string">'1 to 1e%d (in char format)'</span>;
+E=4;
+<span class="keyword">persistent</span> Numbers N
+<span class="keyword">if</span> isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=cell(1,N);
+    <span class="keyword">for</span> n=1:numel(Numbers),Numbers{n}=sprintf(<span class="string">'%d'</span>,n);<span class="keyword">end</span>
+<span class="keyword">end</span>
+then=now;<span class="keyword">for</span> n=1:N,ComputeNonCryptHash(Numbers{n},128);<span class="keyword">end</span>,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+<span class="keyword">end</span>
+<span class="keyword">function</span> [timing,description]=test_3
+description=<span class="string">'1 to 1e%d (in double format)'</span>;
+E=4;
+<span class="keyword">persistent</span> Numbers N
+<span class="keyword">if</span> isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=num2cell(1:N);
+<span class="keyword">end</span>
+then=now;<span class="keyword">for</span> n=1:N,ComputeNonCryptHash(Numbers{n},128);<span class="keyword">end</span>,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+<span class="keyword">end</span>
+<span class="keyword">function</span> [timing,description]=test_4
+description=<span class="string">'1 to 1e%d (in uint16 format)'</span>;
+E=4;
+<span class="keyword">persistent</span> Numbers N
+<span class="keyword">if</span> isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=num2cell(uint16(1:N));
+<span class="keyword">end</span>
+then=now;<span class="keyword">for</span> n=1:N,ComputeNonCryptHash(Numbers{n},128);<span class="keyword">end</span>,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+<span class="keyword">end</span>
+<span class="keyword">function</span> [timing,description]=test_5
+description=<span class="string">'%d images'</span>;
+N=25;
+IM=get_persistent(<span class="string">'IM'</span>,<span class="string">'load'</span>,N);
+then=now;<span class="keyword">for</span> n=1:N,ComputeNonCryptHash(IM{n},128);<span class="keyword">end</span>,timing=(now-then)*(24*60*60);
+description=sprintf(description,N);
+<span class="keyword">end</span>
+<span class="keyword">function</span> out=get_persistent(var,operation,varargin)
+<span class="comment">%allow central loading and saving to prevent a memory hog</span>
+<span class="keyword">persistent</span> Words IM
+<span class="keyword">switch</span> operation
+    <span class="keyword">case</span> <span class="string">'load'</span>
+        <span class="keyword">if</span> strcmp(var,<span class="string">'Words'</span>)
+            <span class="keyword">if</span> nargin&gt;2,N=varargin{1};<span class="keyword">else</span>,N=10000;<span class="keyword">end</span>
+            <span class="keyword">if</span> isempty(Words),Words=get_Words(N);<span class="keyword">end</span>
+            out=Words;
+        <span class="keyword">elseif</span> strcmp(var,<span class="string">'IM'</span>)
+            <span class="keyword">if</span> nargin&gt;2,N=varargin{1};<span class="keyword">else</span>,N=25;<span class="keyword">end</span>
+            <span class="keyword">if</span> isempty(IM),IM=download_example_images(N);<span class="keyword">end</span>
+            out=IM;
+        <span class="keyword">else</span>
+            error(<span class="string">'name not recognized'</span>)
+        <span class="keyword">end</span>
+    <span class="keyword">case</span> <span class="string">'clear'</span>
+        Words=[];IM=[];
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">function</span> Words=get_Words(N)
+<span class="comment">%store to a file in the temp folder</span>
+fn=fullfile(tempdir,<span class="string">'MATLAB'</span>,<span class="string">'FileExchange'</span>,<span class="string">'ComputeNonCryptHash'</span>,<span class="string">'EnglishWordList.txt'</span>);
+<span class="keyword">if</span> ~exist(fn,<span class="string">'file'</span>) <span class="comment">%load from internet</span>
+    txt=readfile([<span class="string">'http://web.archive.org/web/20201006125927id_/https://cdn-140.anonfiles.com/'</span>,<span class="keyword">...</span>
+        <span class="string">'B89ePdcdp9/1fa52173-1601989741/EnglishWordList.txt'</span>]);
+    <span class="keyword">if</span> ~exist(fileparts(fn),<span class="string">'dir'</span>),mkdir(fileparts(fn));<span class="keyword">end</span>
+    txt=sprintf(<span class="string">'%s\n'</span>,txt{:});txt(end)=<span class="string">''</span>;
+    fid=fopen(fn,<span class="string">'w'</span>);fprintf(fid,<span class="string">'%s'</span>,txt);fclose(fid);
+<span class="keyword">end</span>
+txt=readfile(fn);
+<span class="keyword">for</span> n=1:numel(txt),<span class="keyword">if</span> strcmp(txt{n}(1),<span class="string">'%'</span>),txt{n}=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">end</span>
+txt(cellfun(<span class="string">'isempty'</span>,txt))=[];
+Words=txt;
+<span class="keyword">if</span> numel(Words)~=N
+	Words=Words(unique(round(linspace(1,numel(Words),N))));<span class="comment">%select a semi-random sample</span>
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">function</span> IM=download_example_images(N)
+<span class="comment">%download 25 images from the Stanford Dogs Dataset</span>
+<span class="comment">%the links allow up to 5013 images (5043 if duplicates are not removed)</span>
+IM=cell(1,N);
+
+p1=<span class="string">'http://web.archive.org/web'</span>;
+p2=<span class="string">'http://vision.stanford.edu/aditya86/ImageNetDogs'</span>;
+k=0;
+<span class="comment">%Affenpinscher up to Chesapeake Bay retriever</span>
+k=k+1;url{k}=[p1 <span class="string">'/20190429035422fw_/'</span> p2 <span class="string">'/n02110627.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190907200724fw_/'</span> p2 <span class="string">'/n02088094.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20181211003822fw_/'</span> p2 <span class="string">'/n02116738.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035952fw_/'</span> p2 <span class="string">'/n02096051.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035720fw_/'</span> p2 <span class="string">'/n02093428.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429041351fw_/'</span> p2 <span class="string">'/n02107908.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429040002fw_/'</span> p2 <span class="string">'/n02096294.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190430212644fw_/'</span> p2 <span class="string">'/n02110806.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190430212609fw_/'</span> p2 <span class="string">'/n02088238.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035644fw_/'</span> p2 <span class="string">'/n02088364.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190430215444fw_/'</span> p2 <span class="string">'/n02093647.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190413043111fw_/'</span> p2 <span class="string">'/n02107683.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035654fw_/'</span> p2 <span class="string">'/n02089078.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190430212559fw_/'</span> p2 <span class="string">'/n02086646.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035649fw_/'</span> p2 <span class="string">'/n02088466.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20181211003752fw_/'</span> p2 <span class="string">'/n02088632.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190430215535fw_/'</span> p2 <span class="string">'/n02106166.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190430215449fw_/'</span> p2 <span class="string">'/n02093754.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035659fw_/'</span> p2 <span class="string">'/n02090622.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20181211003802fw_/'</span> p2 <span class="string">'/n02096585.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035830fw_/'</span> p2 <span class="string">'/n02106382.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035406fw_/'</span> p2 <span class="string">'/n02108089.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035850fw_/'</span> p2 <span class="string">'/n02112706.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035825fw_/'</span> p2 <span class="string">'/n02105251.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035810fw_/'</span> p2 <span class="string">'/n02101388.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190430215550fw_/'</span> p2 <span class="string">'/n02108422.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429035957fw_/'</span> p2 <span class="string">'/n02096177.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190429041406fw_/'</span> p2 <span class="string">'/n02113186.html'</span>];
+k=k+1;url{k}=[p1 <span class="string">'/20190430212624fw_/'</span> p2 <span class="string">'/n02099849.html'</span>];
+
+<span class="comment">%ignore/remove duplicate images</span>
+files_to_be_ignored={<span class="keyword">...</span>
+    <span class="string">'n02086646_172.jpg'</span>;<span class="string">'n02086646_280.jpg'</span>;<span class="string">'n02086646_422.jpg'</span>;<span class="string">'n02086910_103.jpg'</span>;
+    <span class="string">'n02088466_8078.jpg'</span>;<span class="string">'n02088632_4584.jpg'</span>;<span class="string">'n02088632_600.jpg'</span>;<span class="string">'n02088632_982.jpg'</span>;
+    <span class="string">'n02089867_3177.jpg'</span>;<span class="string">'n02090379_3300.jpg'</span>;<span class="string">'n02090379_855.jpg'</span>;<span class="string">'n02091831_6323.jpg'</span>;
+    <span class="string">'n02092002_4745.jpg'</span>;<span class="string">'n02092002_5557.jpg'</span>;<span class="string">'n02092002_6503.jpg'</span>;<span class="string">'n02093428_1378.jpg'</span>;
+    <span class="string">'n02093428_5635.jpg'</span>;<span class="string">'n02093428_8454.jpg'</span>;<span class="string">'n02093647_2687.jpg'</span>;<span class="string">'n02093647_3277.jpg'</span>;
+    <span class="string">'n02093647_518.jpg'</span>;<span class="string">'n02093859_324.jpg'</span>;<span class="string">'n02093991_4670.jpg'</span>;<span class="string">'n02094258_1408.jpg'</span>;
+    <span class="string">'n02094258_880.jpg'</span>;<span class="string">'n02095314_3227.jpg'</span>;<span class="string">'n02095314_80.jpg'</span>;<span class="string">'n02095570_3101.jpg'</span>;
+    <span class="string">'n02095570_5404.jpg'</span>;<span class="string">'n02095570_6443.jpg'</span>;<span class="string">'n02095889_1582.jpg'</span>;<span class="string">'n02095889_2471.jpg'</span>;
+    <span class="string">'n02095889_6458.jpg'</span>;<span class="string">'n02097130_5576.jpg'</span>;<span class="string">'n02097209_583.jpg'</span>;<span class="string">'n02097209_585.jpg'</span>;
+    <span class="string">'n02097474_7300.jpg'</span>;<span class="string">'n02097658_8018.jpg'</span>;<span class="string">'n02098105_2456.jpg'</span>;<span class="string">'n02098105_2945.jpg'</span>;
+    <span class="string">'n02098286_830.jpg'</span>;<span class="string">'n02099429_3513.jpg'</span>;<span class="string">'n02101556_5903.jpg'</span>;<span class="string">'n02102040_639.jpg'</span>;
+    <span class="string">'n02102177_2388.jpg'</span>;<span class="string">'n02102480_3436.jpg'</span>;<span class="string">'n02102973_1714.jpg'</span>;<span class="string">'n02102973_4469.jpg'</span>;
+    <span class="string">'n02104365_5670.jpg'</span>;<span class="string">'n02104365_7953.jpg'</span>;<span class="string">'n02105056_2194.jpg'</span>;<span class="string">'n02105056_785.jpg'</span>;
+    <span class="string">'n02105162_6449.jpg'</span>;<span class="string">'n02105251_7647.jpg'</span>;<span class="string">'n02106166_1031.jpg'</span>;<span class="string">'n02106166_346.jpg'</span>;
+    <span class="string">'n02106166_4107.jpg'</span>;<span class="string">'n02106166_6084.jpg'</span>;<span class="string">'n02106166_6512.jpg'</span>;<span class="string">'n02106166_6710.jpg'</span>;
+    <span class="string">'n02107908_3531.jpg'</span>;<span class="string">'n02107908_47.jpg'</span>;<span class="string">'n02108000_331.jpg'</span>;<span class="string">'n02109525_7982.jpg'</span>;
+    <span class="string">'n02110185_1614.jpg'</span>;<span class="string">'n02110185_4115.jpg'</span>;<span class="string">'n02112706_2070.jpg'</span>;<span class="string">'n02112706_2074.jpg'</span>;
+    <span class="string">'n02112706_2161.jpg'</span>;<span class="string">'n02112706_2191.jpg'</span>;<span class="string">'n02112706_420.jpg'</span>;<span class="string">'n02112706_539.jpg'</span>;
+    <span class="string">'n02112706_866.jpg'</span>;<span class="string">'n02113186_11400.jpg'</span>;<span class="string">'n02113712_1252.jpg'</span>;<span class="string">'n02113712_1546.jpg'</span>;
+    <span class="string">'n02113712_1558.jpg'</span>;<span class="string">'n02113799_254.jpg'</span>;<span class="string">'n02113978_2572.jpg'</span>;<span class="string">'n02113978_3474.jpg'</span>;
+    <span class="string">'n02113978_3832.jpg'</span>;<span class="string">'n02113978_530.jpg'</span>;<span class="string">'n02113978_737.jpg'</span>;<span class="string">'n02115913_2029.jpg'</span>;
+    <span class="string">'n02115913_3270.jpg'</span>;<span class="string">'n02115913_4032.jpg'</span>;<span class="string">'n02115913_564.jpg'</span>;<span class="string">'n02115913_739.jpg'</span>;
+    <span class="string">'n02115913_750.jpg'</span>};
+
+n=0;then=now;disp_ETA_flag=false;
+parent_folder=fullfile(tempdir,<span class="string">'MATLAB'</span>,<span class="string">'FileExchange'</span>,<span class="string">'ComputeNonCryptHash'</span>,<span class="string">'images'</span>);
+<span class="keyword">if</span> ~exist(parent_folder,<span class="string">'dir'</span>),mkdir(parent_folder);<span class="keyword">end</span>
+<span class="keyword">for</span> breed=1:numel(url)
+    <span class="keyword">if</span> sum(~cellfun(<span class="string">'isempty'</span>,IM))==N,<span class="keyword">continue</span>,<span class="keyword">end</span>
+    local_file=fullfile(parent_folder,sprintf(<span class="string">'dog_breed_%02d.txt'</span>,breed));
+    <span class="keyword">if</span> ~exist(local_file,<span class="string">'file'</span>)
+        str=readfile(url{breed});
+        fid=fopen(local_file,<span class="string">'w'</span>);fprintf(fid,<span class="string">'%s\n'</span>,str{:});fclose(fid);
+    <span class="keyword">end</span>
+    str=readfile(local_file);
+
+    ind=find(ismember(str,{<span class="string">'&lt;div class="highslide-gallery"&gt;'</span>}));
+    ind=ind+2;
+    <span class="keyword">while</span> strcmp(str{ind}(1:4),<span class="string">'&lt;a c'</span>) &amp;&amp; sum(~cellfun(<span class="string">'isempty'</span>,IM))&lt;N
+        elem=str{ind};
+        elem=strrep(elem,<span class="string">'&lt;a class="highslide" href="'</span>,<span class="string">'/'</span>);
+        elem=strrep(elem,<span class="string">'" onclick="return hs.expand(this)"&gt;'</span>,<span class="string">''</span>);
+        ind=ind+2;
+        imurl=[p2 elem];
+        [discard,fn,ext]=fileparts(elem);fn=[fn,ext]; <span class="comment">%#ok&lt;AGROW,ASGLU&gt;</span>
+        <span class="keyword">if</span> ismember(fn,files_to_be_ignored),<span class="keyword">continue</span>,<span class="keyword">end</span>
+        fn=fullfile(parent_folder,fn);
+        <span class="keyword">if</span> ~exist(fn,<span class="string">'file'</span>)
+            WBM(fn,imurl,<span class="string">'flag'</span>,<span class="string">'id'</span>,<span class="string">'tries'</span>,[3 1 2]);
+            disp_ETA_flag=true;
+        <span class="keyword">end</span>
+        n=n+1;
+        <span class="keyword">try</span> IM{n}=imread(fn);<span class="keyword">catch</span>,<span class="keyword">end</span>
+        <span class="keyword">if</span> disp_ETA_flag,ETA_disp(N,n,then);<span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+IM(cellfun(<span class="string">'isempty'</span>,IM))=[];
+<span class="keyword">end</span>
+
+<span class="comment">% The functions below were minified to make them more compact.</span>
+<span class="comment">%</span>
+<span class="comment">% Included functions (internal dependencies not listed):</span>
+<span class="comment">%  - ETA_disp (version 1.0.1)</span>
+<span class="comment">%  - readfile (version 3.0.0)</span>
+<span class="comment">%  - WBM (version 2.0)</span>
+
+<span class="keyword">function</span> v001=ETA_disp(v002,v003,v004),<span class="keyword">persistent</span> v005,<span class="keyword">if</span> isempty(v005)
+v005.addtodate=f11(<span class="string">'&lt;'</span>,7,<span class="string">'Octave'</span>,<span class="string">'&lt;'</span>,4);<span class="keyword">end</span>,v003=max(eps,v003);v006=(now-v004)*(24*60*60);v008=floor(v006/60);v007=round(v006-60*v008);
+v010=v003/v002;v009=min(10^10,round((v006-v010*v006)/v010));<span class="keyword">if</span> v005.addtodate,v011=datestr(now+(v009/(24*60*60)),<span class="string">'HH:MM:SS'</span>);
+<span class="keyword">else</span>,v011=datestr(addtodate(now,v009,<span class="string">'second'</span>),<span class="string">'HH:MM:SS'</span>);<span class="keyword">end</span>,v012=v006/v003;v014=floor(v012/60);v013=v012-60*v014;v001=cell(1,3);
+v001{1}=sprintf(<span class="string">'%05.1f%% done after a total time of %02d:%02d.'</span>,100*v003/v002,v008,v007);v001{2}=sprintf(<span class="string">'estimated time of completion: %s'</span>,v011);
+v001{3}=sprintf(<span class="string">'(%02d:%05.2f per iteration, %d iterations left)'</span>,v014,v013,v002-v003);<span class="keyword">if</span> nargout==0,clc,fprintf(<span class="string">'%s\n'</span>,v001{:});clear <span class="string">v001</span>;<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v015=readfile(v016,varargin),<span class="keyword">if</span> nargin&lt;1,error(<span class="string">'HJW:readfile:nargin'</span>,<span class="string">'Incorrect number of input argument.'</span>)
+<span class="keyword">end</span>,<span class="keyword">if</span> ~(nargout==0 || nargout==1),error(<span class="string">'HJW:WBM:nargout'</span>,<span class="string">'Incorrect number of output argument.'</span>)
+<span class="keyword">end</span>,[v017,v018,v019]=f20(v016,varargin{:});<span class="keyword">if</span> ~v017,rethrow(v019),<span class="keyword">else</span>,[v005,v020,v021]=deal(v018.legacy,v018.UseURLread,v018.err_on_ANSI);
+v022=struct(<span class="string">'con'</span>,v018.print_2_con,<span class="string">'fid'</span>,v018.print_2_fid,<span class="string">'obj'</span>,v018.print_2_obj);<span class="keyword">end</span>,<span class="keyword">if</span> isa(v016,<span class="string">'string'</span>),v016=char(v016);<span class="keyword">end</span>
+<span class="keyword">if</span> numel(v016)&gt;=8 &amp;&amp; ( strcmp(v016(1:7),<span class="string">'http://'</span>) || strcmp(v016(1:8),<span class="string">'https://'</span>) ),<span class="keyword">if</span> ~v005.allows_https &amp;&amp; strcmp(v016(1:8),<span class="string">'https://'</span>)
+f30(v022,<span class="string">'HJW:readfile:httpsNotSupported'</span>,[<span class="string">'This implementation of urlread probably doesn''t allow https requests.'</span>,char(10),<span class="string">'The next lines of code will probably result in an error.'</span>])
+<span class="keyword">end</span>,v023=f19(v016,v020,v022);<span class="keyword">if</span> isa(v023,<span class="string">'cell'</span>),v015=v023;
+<span class="keyword">else</span>,v024=true;v023=f05(v023,v024);<span class="keyword">try</span> [v025,v026,v027]=f28(v023);<span class="keyword">catch</span>,v019=lasterror;<span class="keyword">if</span> strcmp(v019.identifier,<span class="string">'HJW:UTF8_to_unicode:notUTF8'</span>)
+v026=false;<span class="keyword">else</span>,f06(v022,v019),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v026,v023=f25(v027);<span class="keyword">end</span>,v015=f02(v023);<span class="keyword">end</span>,<span class="keyword">else</span>,v015=f18(v016,v022,v021);<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v028=WBM(v016,v029,varargin),f35;<span class="keyword">if</span> nargin&lt;2,error(<span class="string">'HJW:WBM:nargin'</span>,<span class="string">'Incorrect number of input argument.'</span>),<span class="keyword">end</span>,<span class="keyword">if</span> ~(nargout==0 || nargout==1)
+error(<span class="string">'HJW:WBM:nargout'</span>,<span class="string">'Incorrect number of output argument.'</span>),<span class="keyword">end</span>,[v017,v018,v019]=f33(v016,v029,varargin{:});<span class="keyword">if</span> ~v017,rethrow(v019),<span class="keyword">else</span>
+[v030,v031,v032,v033,v034,v035,v036,v037]=deal(v018.date_part,v018.tries,v018.response,v018.ignore,v018.verbose,v018.UseURLwrite,v018.flag,v018.err429);
+v038=v031(2)&gt;0;v022=struct(<span class="string">'con'</span>,v018.print_2_con,<span class="string">'fid'</span>,v018.print_2_fid,<span class="string">'obj'</span>,v018.print_2_obj);v018.print_2=v022;
+<span class="keyword">end</span>,<span class="keyword">if</span> ~f23(fileparts(v016)),f06(v022,<span class="string">'HJW:WBM:NoWriteFolder'</span>,<span class="string">'The target folder doesn''t exist or Matlab doesn''t have write permission for it.'</span>)
+<span class="keyword">end</span>,v039=cellfun(<span class="string">'length'</span>,v032(:,2));[v039,v040]=sort(v039);v040=v040(end:-1:1);v032=v032(v040,:);
+v039=v039(end:-1:1);v041=1;v017=false;v042=[];v043=[];v044=0;<span class="keyword">while</span> ~v017 &amp;&amp;sum(v031(1:2))&gt;0 &amp;&amp; v031(3)&gt;=0,<span class="keyword">if</span> v031(v041)&lt;=0,v041=3-v041;
+<span class="keyword">end</span>,v045=v041;<span class="keyword">try</span> <span class="keyword">if</span> v045==1,v046=false;v031(v045)=v031(v045)-1;<span class="keyword">if</span> v035,v028=urlwrite( [<span class="string">'http://web.archive.org/web/'</span> v030 v036 <span class="string">'_/'</span> v029],v016);
+v028=f04(v016,v028);<span class="keyword">else</span>,v028=websave(v016,[<span class="string">'https://web.archive.org/web/'</span> v030 v036 <span class="string">'_/'</span> v029],weboptions(<span class="string">'Timeout'</span>,10));
+<span class="keyword">end</span>,<span class="keyword">elseif</span> v045==2,v046=true;v031(v045)=v031(v045)-1;<span class="keyword">if</span> v035,v028=urlwrite( [<span class="string">'http://web.archive.org/save/'</span> v029],v016);
+v028=f04(v016,v028);<span class="keyword">else</span>,v028=websave(v016,[<span class="string">'https://web.archive.org/save/'</span> v029],weboptions(<span class="string">'Timeout'</span>,10));<span class="keyword">end</span>,<span class="keyword">end</span>,v017=true;v044=0;
+<span class="keyword">if</span> v038 &amp;&amp; ~f03(v028,v018,v046),v017=false;v041=2;<span class="keyword">end</span>,<span class="keyword">catch</span>,v019=lasterror;v017=false;<span class="keyword">if</span> ~f12,<span class="keyword">while</span> ~f12,v047=datestr(now,<span class="string">'HH:MM:SS'</span>);
+<span class="keyword">if</span> v034&gt;=1,f30(v022,<span class="string">'Internet connection down, retrying in %d seconds (@%s)'</span>,2^v044,v047),<span class="keyword">end</span>,pause(2^v044),v044=min(1+v044,6);
+<span class="keyword">end</span>,<span class="keyword">continue</span>,<span class="keyword">end</span>,v044=0;v048=v019.identifier;v048=strrep(v048,<span class="string">':urlwrite:'</span>,<span class="string">':webservices:'</span>);<span class="keyword">if</span> strcmp(v048,<span class="string">'MATLAB:webservices:Timeout'</span>)
+v049=4080;v031(3)=v031(3)-1;<span class="keyword">else</span>,v050=strrep(v048,<span class="string">'MATLAB:webservices:HTTP'</span>,<span class="string">''</span>);v050=strrep(v050,<span class="string">'StatusCodeError'</span>,<span class="string">''</span>);v050=str2double(v050);
+<span class="keyword">if</span> isnan(v050),v049=-1;<span class="keyword">if</span> v034&gt;=2,f30(v022,v019.identifier,v019.message),<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">switch</span> v019.message,<span class="keyword">case</span> <span class="string">'urlwrite: Couldn''t resolve host name'</span>
+v049=404;<span class="keyword">case</span> [<span class="string">'urlwrite: Peer certificate cannot be '</span>,<span class="string">'authenticated with given CA certificates'</span>],v049=403;
+<span class="keyword">otherwise</span>,v049=v050;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v034&gt;=3,v051=sprintf(<span class="string">'Error %d tries(%d,%d,%d) (download of %s)'</span>,double(v049),v031(1),v031(2),v031(3),v016);
+<span class="keyword">if</span> v022.fid.boolean,fprintf(v022.fid.fid,<span class="string">'%s\n'</span>,v051);
+<span class="keyword">end</span>,<span class="keyword">if</span> v022.obj.boolean,set(v022.obj.obj,<span class="string">'String'</span>,v051),<span class="keyword">end</span>,drawnow,<span class="keyword">end</span>,<span class="keyword">if</span> ~any(v049==v033),v042(end+1)=v049;v043(end+1)=v045;
+<span class="keyword">for</span> v052=1:size(v032,1),<span class="keyword">if</span> length(v042) &lt; v039(v052),<span class="keyword">continue</span>,<span class="keyword">end</span>,v053=v042( (end-v039(v052)+1):end);v054=v043( (end-v039(v052)+1):end);
+v055=v032{v052,1}(2:2:end);v055=strrep(v055,<span class="string">'x'</span>,num2str(v045));v056=strcmp(v055,sprintf(<span class="string">'%d'</span>,v054));<span class="keyword">if</span> isequal( v032{v052,2},v053) &amp;&amp; v056
+<span class="keyword">switch</span> v032{v052,3},<span class="keyword">case</span> <span class="string">'load'</span>,v041=1;<span class="keyword">case</span> <span class="string">'save'</span>,v041=2;<span class="keyword">case</span> <span class="string">'exit'</span>,v031=[0 0 -1];<span class="keyword">case</span> <span class="string">'pause_retry'</span>,<span class="keyword">if</span> ~v037.CountsAsTry
+v031(v041)=v031(v041)+1;<span class="keyword">end</span>,<span class="keyword">if</span> v034&gt;=v037.PrintAtVerbosityLevel,v057=10;v058=<span class="string">'Waiting a while until the server won''t block us anymore'</span>;
+<span class="keyword">if</span> v022.fid.boolean,fprintf(v022.fid.fid,v058);drawnow,<span class="keyword">end</span>,<span class="keyword">for</span> v003=1:v057,pause(v037.TimeToWait/v057),<span class="keyword">if</span> v022.fid.boolean
+fprintf(v022.fid.fid,<span class="string">'.'</span>);drawnow,<span class="keyword">end</span>,<span class="keyword">if</span> v022.obj.boolean,v058=[v058 <span class="string">'.'</span>];set(v022.obj.obj,v058);drawnow,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v022.fid.boolean
+fprintf(v022.fid.fid,<span class="string">'\nContinuing\n'</span>);drawnow,<span class="keyword">end</span>,<span class="keyword">if</span> v022.obj.boolean,set(v022.obj.obj,<span class="string">'Continuing'</span>);drawnow,<span class="keyword">end</span>,<span class="keyword">else</span>,pause(v037.TimeToWait),<span class="keyword">end</span>
+<span class="keyword">end</span>,<span class="keyword">break</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> ~v017 || ( ~v038 &amp;&amp; ~f03(v028,v018,v046) ),<span class="keyword">if</span> exist(v016,<span class="string">'file'</span>),delete(v016);<span class="keyword">end</span>,v059=[v016 <span class="string">'.html'</span>];v079=dir(v059);
+<span class="keyword">if</span> numel(v079)==1 &amp;&amp; v079.bytes==0 &amp;&amp; abs(datenum(v079.date)-now)&lt;=(1/24),delete(v059);<span class="keyword">end</span>,v028=[];<span class="keyword">end</span>,v059=[v016 <span class="string">'.html'</span>];v079=dir(v059);
+<span class="keyword">if</span> numel(v079)==1 &amp;&amp; v079.bytes==0 &amp;&amp; abs(datenum(v079.date)-now)&lt;=(1/24),<span class="keyword">try</span> delete(v059);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> nargout==0,clear(<span class="string">'outfilename'</span>);<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v001=f01(v060,v061),<span class="keyword">try</span> v001=v060+v061;<span class="keyword">catch</span>,<span class="keyword">try</span> v001=bsxfun(@plus,v060,v061);
+<span class="keyword">catch</span>,v063=size(v060); v062=size(v061);v060=repmat(v060,max(1,v062./v063)); v061=repmat(v061,max(1,v063./v062));v001=v060+v061;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v064=f02(v023),v065=[0 find(v023==10) numel(v023)+1];
+v064=cell(numel(v065)-1,1);<span class="keyword">for</span> v003=1:numel(v064),v066=(v065(v003 )+1);v067=(v065(v003+1)-1);v064{v003}=v023(v066:v067);<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v068=f03(v028,v018,v046),<span class="keyword">if</span> ~exist(v028,<span class="string">'file'</span>),v068=false;<span class="keyword">return</span>
+<span class="keyword">end</span>,[v069,v070,v022]=deal(v018.m_date_r,v018.date_bounds,v018.print_2);<span class="keyword">if</span> ~v046,v071=f31;<span class="keyword">end</span>,v072=<span class="string">'&lt;input type="hidden" name="date" value="'</span>;
+v015=readfile(v028);v073=0;<span class="keyword">while</span> v073&lt;=numel(v015) &amp;&amp; (v073==0 || ~strcmp(f21(v015{v073}),<span class="string">'&lt;td class="u" colspan="2"&gt;'</span>))
+v073=v073+1;<span class="keyword">end</span>,<span class="keyword">if</span> numel(v015)&gt;=(v073+1),v074=v015{v073+1};
+v075=strfind(v074,v072);v075=v075+length(v072)-1;v076=str2double(v074(v075+(1:14)));v068= v070.double(1)&lt;=v076 &amp;&amp; v076&lt;=v070.double(2);
+<span class="keyword">return</span>,<span class="keyword">end</span>,v015=v015(:)';v015=cell2mat(v015);v075=strfind(v015,<span class="string">'/web/'</span>);<span class="keyword">if</span> numel(v075)==0,<span class="keyword">if</span> v069==0,v068=true;
+<span class="keyword">return</span>,<span class="keyword">elseif</span> v069==1,f30(v022,<span class="string">'HJW:WBM:MissingDateWarning'</span>,<span class="string">'No date found in file, unable to check date, assuming it is correct.'</span>),v068=true;<span class="keyword">return</span>
+<span class="keyword">elseif</span> v069==2,f06(v022,<span class="string">'HJW:WBM:MissingDateError'</span>,[<span class="string">'Could not find date. This can mean there is an '</span>,<span class="string">'error in the save. Try saving manually.'</span>])
+<span class="keyword">end</span>,<span class="keyword">end</span>,v077=zeros(size(v075));v015=[v015 <span class="string">'abcdefghijklmnopqrstuvwxyz'</span>];<span class="keyword">if</span> exist(<span class="string">'isstrprop'</span>,<span class="string">'builtin'</span>)
+<span class="keyword">for</span> v003=1:length(v075),<span class="keyword">for</span> v078=1:14,<span class="keyword">if</span> ~isstrprop(v015(v075(v003)+4+v078),<span class="string">'digit'</span>),<span class="keyword">break</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v077(v003)=str2double(v015(v075(v003)+4+(1:v078)));
+<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">for</span> v003=1:length(v075),<span class="keyword">for</span> v078=1:14,<span class="keyword">if</span> ~any(double(v015(v075(v003)+4+v078))==(48:57)),<span class="keyword">break</span>
+<span class="keyword">end</span>,<span class="keyword">end</span>,v077(v003)=str2double(v015(v075(v003)+4+(1:v078)));<span class="keyword">end</span>,<span class="keyword">end</span>,[v079,v080,v064]=unique(v077);<span class="keyword">try</span> [v080,v081]=max(histc(v064,1:max(v064)));<span class="keyword">catch</span>
+[v080,v081]=max(accumarray(v064,1));<span class="keyword">end</span>,v076=v079(v081);v068= v070.double(1)&lt;=v076 &amp;&amp; v076&lt;=v070.double(2);<span class="keyword">if</span> ~v046,<span class="keyword">if</span> v076&lt;1e4,<span class="keyword">if</span> v069==0,v068=true;
+<span class="keyword">return</span>,<span class="keyword">elseif</span> v069==1,f30(v022,<span class="string">'HJW:WBM:MissingDateWarning'</span>,<span class="string">'No date found in file, unable to check date, assuming it is correct.'</span>),v068=true;<span class="keyword">return</span>
+<span class="keyword">elseif</span> v069==2,f06(v022,<span class="string">'HJW:WBM:MissingDateError'</span>,[<span class="string">'Could not find date. This can mean there is an '</span>,<span class="string">'error in the save. Try saving manually.'</span>])
+<span class="keyword">end</span>,<span class="keyword">end</span>,v074=sprintf(<span class="string">'%014d'</span>,v076);v074={v074(1:4),v074(5:6),v074(7:8),v074(9:10),v074(11:12),v074(13:14)};
+v074=str2double(v074);timediff=(v071-datenum(v074))*24*60*60;<span class="keyword">if</span> timediff&lt;10,v068=false;<span class="keyword">elseif</span> timediff&lt;60
+warning(<span class="string">'HJW:WBM:LivePageStored'</span>,[<span class="string">'The live page might have been saved instead of a capture.'</span>,char(10),<span class="string">'Check on the WBM if a capture exists.'</span>])
+<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v028=f04(v016,v028),v083=[pwd filesep v016];<span class="keyword">if</span> ~strcmp(v028,v083),<span class="keyword">if</span> ~exist(v028,<span class="string">'file'</span>) &amp;&amp;exist(v083,<span class="string">'file'</span>),v028=v083;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v023=f05(v023,v084)
+<span class="keyword">persistent</span> v085 v086,<span class="keyword">if</span> isempty(v085),v087=[338 140;339 156;352 138;353 154;376 159;381 142;382 158;402 131;710 136;732 152;
+8211 150;8212 151;8216 145;8217 146;8218 130;8220 147;8221 148;8222 132;8224 134;8225 135;
+8226 149;8230 133;8240 137;8249 139;8250 155;8364 128;8482 153];v085=v087(:,2);v086=v087(:,1);<span class="keyword">end</span>,<span class="keyword">if</span> nargin&gt;1 &amp;&amp; v084
+v089=v086;v088=v085;<span class="keyword">else</span>,v089=v085;v088=v086;<span class="keyword">end</span>,v023=uint32(v023);<span class="keyword">for</span> v078=1:numel(v089),v023=f17(v023,v089(v078),v088(v078));<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> f06(v090,varargin)
+<span class="keyword">if</span> isempty(v090),v090=struct;<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v090,<span class="string">'fid'</span>),v090.fid.boolean=false;<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v090,<span class="string">'obj'</span>),v090.obj.boolean=false;<span class="keyword">end</span>,<span class="keyword">if</span> nargin==2
+<span class="keyword">if</span> isa(varargin{1},<span class="string">'struct'</span>) || isa(varargin{1},<span class="string">'MException'</span>),v019=varargin{1};<span class="keyword">try</span> v091=v019.stack;v092=f07(0,v091);<span class="keyword">catch</span>,[v092,v091]=f07(2);
+<span class="keyword">end</span>,v093=v019.identifier;v094=v019.message;v095=<span class="string">'Error using &lt;a href="matlab:matlab.internal.language.introspective.errorDocCallback('</span>;
+<span class="keyword">if</span> isa(v019,<span class="string">'struct'</span>) &amp;&amp; numel(v094)&gt;numel(v095) &amp;&amp; strcmp(v095,v094(1:numel(v095)))
+v094(1:find(v094==10,1))=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">else</span>,[v092,v091]=f07(2);[v093,v094]=deal(<span class="string">''</span>,varargin{1});<span class="keyword">end</span>,<span class="keyword">else</span>,[v092,v091]=f07(2);
+<span class="keyword">if</span> ~isempty(strfind(varargin{1},<span class="string">'%'</span>)),v093=<span class="string">''</span>;v096=varargin(2:end);v094=sprintf(varargin{1},v096{:});<span class="keyword">else</span>,v093=varargin{1};v094=varargin{2};
+<span class="keyword">if</span> nargin&gt;3,v096=varargin(3:end);v094=sprintf(v094,v096{:});<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v019=struct(<span class="string">'identifier'</span>,v093,<span class="string">'message'</span>,v094,<span class="string">'stack'</span>,v091);<span class="keyword">if</span> v090.obj.boolean
+v097=v094;<span class="keyword">while</span> v097(end)==10,v097(end)=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">if</span> any(v097==10),v097=regexp_outkeys([<span class="string">'Error: '</span> v097],char(10),<span class="string">'split'</span>);<span class="keyword">else</span>,v097=[<span class="string">'Error: '</span> v097];
+<span class="keyword">end</span>,set(v090.obj.obj,<span class="string">'String'</span>,v097),<span class="keyword">end</span>,<span class="keyword">if</span> v090.fid.boolean,fprintf(v090.fid.fid,<span class="string">'Error: %s\n%s'</span>,v094,v092);<span class="keyword">end</span>,rethrow(v019),<span class="keyword">end</span>
+<span class="keyword">function</span> [v023,v091]=f07(v098,v091),<span class="keyword">if</span> nargin==0,v098=1;<span class="keyword">end</span>
+<span class="keyword">if</span> nargin&lt;2, v091=dbstack;<span class="keyword">end</span>,v091(1:v098)=[];<span class="keyword">if</span> ~isfield(v091,<span class="string">'file'</span>),<span class="keyword">for</span> v003=1:numel(v091),v099=v091(v003).name;<span class="keyword">if</span> strcmp(v099(end),<span class="string">')'</span>)
+v100=strfind(v099,<span class="string">'('</span>);v101=v099( (v100(end)+1):(end-1) );v102=v099(1:(v100(end)-2));<span class="keyword">else</span>,v102=v099;[v033,v101]=fileparts(v099);
+<span class="keyword">end</span>,[v033,v091(v003).file]=fileparts(v102);v091(v003).name=v101;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">persistent</span> v103,<span class="keyword">if</span> isempty(v103),v103=exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>);<span class="keyword">end</span>
+<span class="keyword">if</span> v103,<span class="keyword">for</span> v003=1:numel(v091),[v033,v091(v003).file]=fileparts(v091(v003).file);<span class="keyword">end</span>,<span class="keyword">end</span>,v058=v091;v104=<span class="string">'&gt;'</span>;
+v023=cell(1,numel(v058)-1);<span class="keyword">for</span> v003=1:numel(v058),[v105,v058(v003).file,v106]=fileparts(v058(v003).file);<span class="keyword">if</span> v003==numel(v058),v058(v003).file=<span class="string">''</span>;<span class="keyword">end</span>
+<span class="keyword">if</span> strcmp(v058(v003).file,v058(v003).name),v058(v003).file=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">if</span> ~isempty(v058(v003).file),v058(v003).file=[v058(v003).file <span class="string">'&gt;'</span>];<span class="keyword">end</span>
+v023{v003}=sprintf(<span class="string">'%c In %s%s (line %d)\n'</span>,v104,v058(v003).file,v058(v003).name,v058(v003).line);v104=<span class="string">' '</span>;<span class="keyword">end</span>,v023=horzcat(v023{:});<span class="keyword">end</span>
+<span class="keyword">function</span> v107=f08(v108),<span class="keyword">if</span> nargin==0,v109=f09;<span class="keyword">if</span> isempty(v109),v109=f10;<span class="keyword">if</span> isempty(v109)
+error(<span class="string">'HJW:getUTC:TimeReadFailed'</span>,[<span class="string">'Both methods of retrieving the UTC timestamp failed.\nEnsure you '</span>,<span class="string">'have write access to the current folder and check your internet connection.'</span>])
+<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> v108==1,v109=f09;<span class="keyword">else</span>,v109=f10;<span class="keyword">end</span>,<span class="keyword">end</span>,v110=v109/(24*60*60);v107=v110+datenum(1970,1,1);<span class="keyword">end</span>
+<span class="keyword">function</span> v109=f09,<span class="keyword">persistent</span> v111 v112 v113 v114 v115,<span class="keyword">if</span> isempty(v111)
+v113=[<span class="string">'utc_time_'</span> f16];v113=strrep(v113,[<span class="string">'.'</span> mexext],<span class="string">''</span>);<span class="keyword">try</span> v114=str2func(v113);<span class="keyword">catch</span>,<span class="keyword">end</span>,v112=fullfile(tempdir,<span class="string">'MATLAB'</span>,<span class="string">'FileExchange'</span>,<span class="string">'getUTC'</span>);<span class="keyword">try</span>
+<span class="keyword">if</span> isempty(strfind([path <span class="string">';'</span>],[v112 <span class="string">';'</span>])),<span class="keyword">if</span> ~exist(v112,<span class="string">'dir'</span>),mkdir(v112);<span class="keyword">end</span>,addpath(v112,<span class="string">'-end'</span>);<span class="keyword">end</span>,<span class="keyword">catch</span>,<span class="keyword">end</span>,v115=5;v111={<span class="string">'#include "mex.h"'</span>;
+<span class="string">'#include "time.h"'</span>;<span class="string">''</span>;<span class="string">'/* Abraham Cohn,  3/17/2005 */'</span>;<span class="string">'/* Philips Medical Systems */'</span>;<span class="string">''</span>;<span class="string">'void mexFunction(int nlhs, mxArray *plhs[], int nrhs,'</span>;
+<span class="string">'                 const mxArray *prhs[])'</span>;<span class="string">'{'</span>;<span class="string">'  time_t utc;'</span>;<span class="string">'  '</span>;<span class="string">'  if (nlhs &gt; 1) {'</span>;<span class="string">'    mexErrMsgTxt("Too many output arguments");'</span>;<span class="string">'  }'</span>;<span class="string">'  '</span>;
+<span class="string">'  /* Here is a nice ref: www.cplusplus.com/ref/ctime/time.html */'</span>;<span class="string">'  time(&amp;utc);'</span>;<span class="string">'  /* mexPrintf("UTC time in local zone: %s",ctime(&amp;utc)); */'</span>;
+<span class="string">'  /* mexPrintf("UTC time in GMT: %s",asctime(gmtime(&amp;utc))); */'</span>;<span class="string">'  '</span>;<span class="string">'  /* Create matrix for the return argument. */'</span>;
+<span class="string">'  plhs[0] = mxCreateDoubleScalar((double)utc);'</span>;<span class="string">'   '</span>;<span class="string">'}'</span>};<span class="keyword">end</span>,<span class="keyword">try</span> v109=feval(v114);<span class="keyword">catch</span>,<span class="keyword">if</span> exist([<span class="string">'utc_time.'</span> f16],<span class="string">'file'</span>)
+v019=lasterror;rethrow(v019);<span class="keyword">end</span>,v115=v115-1;<span class="keyword">if</span> v115&lt;0,v109=[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">if</span> f23(v112),v010=v112;<span class="keyword">else</span>,v010=pwd;<span class="keyword">end</span>,v116=cd(v010);
+<span class="keyword">try</span> <span class="keyword">if</span> ~exist(fullfile(v010,[v113 <span class="string">'.c'</span>]),<span class="string">'file'</span>),v117=fopen(fullfile(v010,[v113 <span class="string">'.c'</span>]),<span class="string">'w'</span>);<span class="keyword">for</span> v074=1:numel(v111),fprintf(v117,<span class="string">'%s\n'</span>,v111{v074});
+<span class="keyword">end</span>,fclose(v117);<span class="keyword">end</span>,<span class="keyword">try</span> mex([v113 <span class="string">'.c'</span>]);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">for</span> v118={<span class="string">'c'</span>,<span class="string">'o'</span>},v102=fullfile(v010,[v113 <span class="string">'.'</span> v118{1}]);<span class="keyword">if</span> exist(v102,<span class="string">'file'</span>),delete(v102),<span class="keyword">end</span>
+<span class="keyword">end</span>,<span class="keyword">catch</span>,<span class="keyword">end</span>,cd(v116);<span class="keyword">if</span> exist([v113 <span class="string">'.'</span> mexext],<span class="string">'file'</span>),v114=str2func(v113);v109=feval(v114);<span class="keyword">else</span>,v109=[];<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v109=f10,<span class="keyword">if</span> ~f12,v109=[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">for</span> v031=1:3,<span class="keyword">try</span> <span class="keyword">if</span> exist(<span class="string">'webread'</span>,<span class="string">'file'</span>),v015=webread(<span class="string">'http://www.utctime.net/utc-timestamp'</span>);
+<span class="keyword">else</span>,v015=urlread(<span class="string">'http://www.utctime.net/utc-timestamp'</span>);<span class="keyword">end</span>,<span class="keyword">break</span>,<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">try</span> v015(v015==<span class="string">' '</span>)=<span class="string">''</span>;v095=<span class="string">'vartimestamp='</span>;
+v119=strfind(v015,v095)+numel(v095);v120=strfind(v015,<span class="string">';'</span>)-1;v120(v120&lt;v119)=[];v109=str2double(v015(v119:v120(1)));<span class="keyword">catch</span>,v109=[];<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v121=f11(v122,v123,v124,v125,v126),<span class="keyword">persistent</span> v127 v128 v129,<span class="keyword">if</span> isempty(v127),v129=exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>);v127=version;
+v025=strfind(v127,<span class="string">'.'</span>);<span class="keyword">if</span> numel(v025)~=1,v127(v025(2):end)=<span class="string">''</span>;v025=v025(1);<span class="keyword">end</span>,v127=[str2double(v127(1:(v025-1))) str2double(v127((v025+1):end))];
+v127=v127(1)+v127(2)/100;v127=round(100*v127);v128={ <span class="string">'R13'</span> 605;<span class="string">'R13SP1'</span> 605;<span class="string">'R13SP2'</span> 605;<span class="string">'R14'</span> 700;<span class="string">'R14SP1'</span> 700;<span class="string">'R14SP2'</span> 700;<span class="string">'R14SP3'</span> 701;
+<span class="string">'R2006a'</span> 702;<span class="string">'R2006b'</span> 703;<span class="string">'R2007a'</span> 704;<span class="string">'R2007b'</span> 705;<span class="string">'R2008a'</span> 706;<span class="string">'R2008b'</span> 707;
+<span class="string">'R2009a'</span> 708;<span class="string">'R2009b'</span> 709;<span class="string">'R2010a'</span> 710;<span class="string">'R2010b'</span> 711;<span class="string">'R2011a'</span> 712;<span class="string">'R2011b'</span> 713;
+<span class="string">'R2012a'</span> 714;<span class="string">'R2012b'</span> 800;<span class="string">'R2013a'</span> 801;<span class="string">'R2013b'</span> 802;<span class="string">'R2014a'</span> 803;<span class="string">'R2014b'</span> 804;
+<span class="string">'R2015a'</span> 805;<span class="string">'R2015b'</span> 806;<span class="string">'R2016a'</span> 900;<span class="string">'R2016b'</span> 901;<span class="string">'R2017a'</span> 902;<span class="string">'R2017b'</span> 903;
+<span class="string">'R2018a'</span> 904;<span class="string">'R2018b'</span> 905;<span class="string">'R2019a'</span> 906;<span class="string">'R2019b'</span> 907;<span class="string">'R2020a'</span> 908;<span class="string">'R2020b'</span>,909};<span class="keyword">end</span>,<span class="keyword">if</span> v129,<span class="keyword">if</span> nargin==2
+warning(<span class="string">'HJW:ifversion:NoOctaveTest'</span>,[<span class="string">'No version test for Octave was provided.'</span>,char(10),<span class="string">'This function might return an unexpected outcome.'</span>])
+v130=ismember(v128(:,1),v123);
+<span class="keyword">if</span> sum(v130)~=1,warning(<span class="string">'HJW:ifversion:NotInDict'</span>,<span class="string">'The requested version is not in the hard-coded list.'</span>),v121=NaN;<span class="keyword">return</span>,<span class="keyword">else</span>
+v131=v128{v130,2};<span class="keyword">end</span>,<span class="keyword">elseif</span> nargin==4,[v122,v131]=deal(v124,v125);v131=0.1*v131+0.9*fix(v131);v131=round(100*v131);<span class="keyword">else</span>,[v122,v131]=deal(v125,v126);
+v131=0.1*v131+0.9*fix(v131);v131=round(100*v131);<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> isnumeric(v123),v131=0.1*v123+0.9*fix(v123);v131=round(100*v131);
+<span class="keyword">else</span>,v130=ismember(v128(:,1),v123);<span class="keyword">if</span> sum(v130)~=1,warning(<span class="string">'HJW:ifversion:NotInDict'</span>,<span class="string">'The requested version is not in the hard-coded list.'</span>)
+v121=NaN;<span class="keyword">return</span>,<span class="keyword">else</span>,v131=v128{v130,2};<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">switch</span> v122,<span class="keyword">case</span> <span class="string">'=='</span>, v121= v127 == v131;
+<span class="keyword">case</span> <span class="string">'&lt;'</span> , v121= v127 &lt; v131;<span class="keyword">case</span> <span class="string">'&lt;='</span>, v121= v127 &lt;= v131;<span class="keyword">case</span> <span class="string">'&gt;'</span> , v121= v127 &gt; v131;<span class="keyword">case</span> <span class="string">'&gt;='</span>, v121= v127 &gt;= v131;<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v132,v133]=f12,v121=f15;<span class="keyword">if</span> isempty(v121),v132=0;v133=0;<span class="keyword">else</span>,<span class="keyword">if</span> v121,[v132,v133]=f13;<span class="keyword">else</span>,[v132,v133]=f14;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v132,v133]=f13,<span class="keyword">try</span> v004=now;<span class="keyword">if</span> exist(<span class="string">'webread'</span>,<span class="string">'file'</span>)
+v023=webread(<span class="string">'http://google.com'</span>);<span class="keyword">else</span>,v023=urlread(<span class="string">'http://google.com'</span>);<span class="keyword">end</span>,v132=1;v133=(now-v004)*24*3600*1000;<span class="keyword">catch</span>,v132=0;v133=0;<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v132,v133]=f14,<span class="keyword">if</span> ispc,<span class="keyword">try</span> [v080,v134]=system(<span class="string">'ping -n 1 8.8.8.8'</span>);
+v135=v134(strfind(v134,<span class="string">' = '</span>)+3);v135=v135(1:3);<span class="keyword">if</span> ~strcmp(v135,<span class="string">'110'</span>),error(<span class="string">'trigger error'</span>),<span class="keyword">else</span>,v132=1;[v119,v120]=regexp(v134,<span class="string">' [0-9]+ms'</span>);
+v133=v134((v119(1)+1):(v120(1)-2));v133=str2double(v133);<span class="keyword">end</span>,<span class="keyword">catch</span>,v132=0;v133=0;<span class="keyword">end</span>,<span class="keyword">elseif</span> isunix,<span class="keyword">try</span> [v080,v134]=system(<span class="string">'ping -c 1 8.8.8.8'</span>);
+v100=regexp(v134,<span class="string">', [01] '</span>);<span class="keyword">if</span> v134(v100+2)~=<span class="string">'1'</span>,error(<span class="string">'trigger error'</span>),<span class="keyword">else</span>,v132=1;[v119,v120]=regexp(v134,<span class="string">'=[0-9.]+ ms'</span>);
+v133=v134((v119(1)+1):(v120(1)-2));v133=str2double(v133);<span class="keyword">end</span>,<span class="keyword">catch</span>,v132=0;v133=0;<span class="keyword">end</span>,<span class="keyword">else</span>,error(<span class="string">'How did you even get Matlab to work?'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v121,v132,v133]=f15,<span class="keyword">persistent</span> v136,<span class="keyword">if</span> ~isempty(v136)
+v121=v136;<span class="keyword">return</span>,<span class="keyword">end</span>,[v132,v133]=f14;<span class="keyword">if</span> v132,v136=false;v121=false;<span class="keyword">return</span>,<span class="keyword">end</span>,[v132,v133]=f13;<span class="keyword">if</span> v132,v136=true;v121=true;<span class="keyword">return</span>,<span class="keyword">end</span>,v121=[];<span class="keyword">end</span>
+<span class="keyword">function</span> v118=f16
+v131=version;v100=strfind(v131,<span class="string">'.'</span>);v131(v100(2):end)=<span class="string">''</span>;v131=[<span class="string">'v'</span> strrep(v131,<span class="string">'.'</span>,<span class="string">'_'</span>)];<span class="keyword">if</span> ~exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>),v045=computer;
+<span class="keyword">else</span>,v137=computer;v137=v137(1:(strfind(v137,<span class="string">'-'</span>)-1));<span class="keyword">if</span> ispc,<span class="keyword">if</span> strcmp(v137,<span class="string">'x86_64'</span>) ,v045= <span class="string">'win_64'</span>;<span class="keyword">elseif</span> strcmp(v137,<span class="string">'i686'</span>),v045= <span class="string">'win_i686'</span>;
+<span class="keyword">elseif</span> strcmp(v137,<span class="string">'x86'</span>) ,v045= <span class="string">'win_x86'</span>;<span class="keyword">else</span> ,v045=[<span class="string">'win_'</span> v137];<span class="keyword">end</span>,<span class="keyword">elseif</span> isunix &amp;&amp; ~ismac,<span class="keyword">if</span> strcmp(v137,<span class="string">'i686'</span>) ,v045= <span class="string">'lnx_i686'</span>;
+<span class="keyword">elseif</span> strcmp(v137,<span class="string">'x86_64'</span>),v045= <span class="string">'lnx_64'</span>;<span class="keyword">else</span> ,v045=[<span class="string">'lnx_'</span> v137];<span class="keyword">end</span>,<span class="keyword">elseif</span> ismac,<span class="keyword">if</span> strcmp(v137,<span class="string">'x86_64'</span>),v045= <span class="string">'mac_64'</span>;
+<span class="keyword">else</span> ,v045=[<span class="string">'mac_'</span> v137];<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v045=strrep(strrep(v045,<span class="string">'.'</span>,<span class="string">''</span>),<span class="string">'-'</span>,<span class="string">''</span>);v118=[v131 <span class="string">'_'</span> v045 <span class="string">'.'</span> mexext];<span class="keyword">end</span>
+<span class="keyword">function</span> v001=f17(v138,v139,v140)
+v001=v138(:)';<span class="keyword">if</span> numel(v139)==0,v130=false(size(v138));<span class="keyword">elseif</span> numel(v140)&gt;numel(v139),error(<span class="string">'not implemented (padding required)'</span>)
+<span class="keyword">else</span>,v130=true(size(v138));<span class="keyword">for</span> v003=1:numel(v139),v141=find(v138==v139(v003));v141=v141-v003+1;v141(v141&lt;1)=[];v142=false(size(v130));v142(v141)=true;
+v130= v130 &amp; v142;<span class="keyword">if</span> ~any(v130),<span class="keyword">break</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v141=find(v130);<span class="keyword">if</span> ~isempty(v141),<span class="keyword">for</span> v003=1:numel(v140),v001(v141+v003-1)=v140(v003);
+<span class="keyword">end</span>,<span class="keyword">if</span> numel(v140)==0,v003=0;<span class="keyword">end</span>,<span class="keyword">if</span> numel(v139)&gt;v003,v141=v141(:);v143=(v003+1):numel(v139);v075=f01(v141,v143-1);v001(v075(:))=[];<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v023=f18(v016,v022,v021)
+<span class="keyword">if</span> nargin==1,v022=struct;v021=false;<span class="keyword">end</span>,<span class="keyword">persistent</span> v144,<span class="keyword">if</span> isempty(v144),v144 = exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>) ~= 0;<span class="keyword">end</span>
+<span class="keyword">persistent</span> v145,<span class="keyword">if</span> isempty(v145),<span class="keyword">if</span> v144,v146=<span class="string">'Octave'</span>;<span class="keyword">else</span>,v146=<span class="string">'Matlab'</span>;<span class="keyword">end</span>
+v145=struct(<span class="string">'identifier'</span>,<span class="string">'HJW:readfile:ReadFail'</span>,<span class="string">'message'</span>,sprintf(<span class="string">'%s could not read the file %s.\nThe file doesn''t exist or is not readable.'</span>,v146,v016));
+<span class="keyword">end</span>,v117=fopen(v016,<span class="string">'rb'</span>);<span class="keyword">if</span> v117&lt;0,f06(v022,v145),<span class="keyword">end</span>,v015=fread(v117,<span class="string">'uint8'</span>);
+fclose(v117);v015=v015.';<span class="keyword">try</span> v026=true;v027=f28(v015);<span class="keyword">catch</span>,v019=lasterror;<span class="keyword">if</span> strcmp(v019.identifier,<span class="string">'HJW:UTF8_to_unicode:notUTF8'</span>),v026=false;
+<span class="keyword">if</span> v021,f06(v022,<span class="string">'HJW:readfile:notUTF8'</span>,<span class="string">'The provided file "%s" is not a correctly encoded UTF-8 file.'</span>,v016),<span class="keyword">end</span>,<span class="keyword">else</span>,f06(v022,v019),<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">if</span> v144,<span class="keyword">if</span> v026,v023=v027;<span class="keyword">else</span>,<span class="keyword">try</span> v023=fileread(v016);<span class="keyword">catch</span>,f06(v022,v145),<span class="keyword">end</span>,v023=f05(v023);<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> ispc,<span class="keyword">if</span> v026,v023=v027;<span class="keyword">else</span>,<span class="keyword">if</span> f11(<span class="string">'&lt;'</span>,7)
+<span class="keyword">try</span> v023=fileread(v016);<span class="keyword">catch</span>,f06(v022,v145),<span class="keyword">end</span>,v023=f05(v023);<span class="keyword">else</span>,<span class="keyword">try</span> v023=fileread(v016);<span class="keyword">catch</span>,f06(v022,v145),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> v026,v023=v027;
+<span class="keyword">else</span>,v023=f05(v015);<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v023(v023==13)=[];<span class="keyword">if</span> numel(v023)&gt;=1 &amp;&amp; double(v023(1))==65279,v023(1)=[];<span class="keyword">end</span>,v023=f25(v023);v023=f02(v023);<span class="keyword">end</span>
+<span class="keyword">function</span> v023=f19(v147,v020,v148)
+<span class="keyword">try</span> v149=false;v150=f24(<span class="string">'readfile_from_URL_tmp_'</span>,<span class="string">'.txt'</span>);<span class="keyword">try</span> <span class="keyword">if</span> v020,v150=urlwrite(v147,v150);<span class="keyword">else</span>,v150=websave(v150,v147);<span class="keyword">end</span>
+v023=f18(v150);<span class="keyword">catch</span>,v149=true;<span class="keyword">end</span>,<span class="keyword">try</span> <span class="keyword">if</span> exist(v150,<span class="string">'file'</span>),delete(v150);<span class="keyword">end</span>,<span class="keyword">catch</span>,<span class="keyword">end</span>
+<span class="keyword">if</span> v149,error(<span class="string">'revert to urlread'</span>),<span class="keyword">end</span>,<span class="keyword">catch</span>,<span class="keyword">try</span> <span class="keyword">if</span> v020,v023=urlread(v147);<span class="keyword">else</span>,v023=webread(v147);<span class="keyword">end</span>,<span class="keyword">catch</span>,f06(v148,lasterror),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v017,v090,v019]=f20(v016,varargin),v017=false;v090=struct;v019=struct(<span class="string">'identifier'</span>,<span class="string">''</span>,<span class="string">'message'</span>,<span class="string">''</span>);
+<span class="keyword">if</span> ~( isa(v016,<span class="string">'char'</span>) || isa(v016,<span class="string">'string'</span>) ) ||( isa(v016,<span class="string">'string'</span>) &amp;&amp; numel(v016)~=1 ) ||( isa(v016,<span class="string">'char'</span>) &amp;&amp; numel(v016)==0 )
+v019.identifier=<span class="string">'HJW:readfile:IncorrectInput'</span>;v019.message=<span class="string">'The file name must be a non-empty char or a scalar string.'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">persistent</span> v151,<span class="keyword">if</span> isempty(v151),v005.split = f11(<span class="string">'&lt;'</span>,<span class="string">'R2007b'</span>,<span class="string">'Octave'</span>,<span class="string">'&lt;'</span>,4);
+v005.allows_https=f11(<span class="string">'&gt;'</span>,0,<span class="string">'Octave'</span>,<span class="string">'&lt;'</span>,0);v151.legacy=v005;v151.UseURLread=isempty(which(<span class="string">'webread'</span>)) || isempty(which(<span class="string">'websave'</span>));
+v151.print_2_con=true;v151.print_2_fid.boolean=false;v151.print_2_obj.boolean=false;v151.err_on_ANSI=false;<span class="keyword">end</span>,<span class="keyword">if</span> nargin==1
+v090=v151;v017=true;<span class="keyword">return</span>,<span class="keyword">end</span>,v152=nargin==2 &amp;&amp; isa(varargin{1},<span class="string">'struct'</span>);v153=mod(nargin,2)==1 &amp;&amp;all(cellfun(<span class="string">'isclass'</span>,varargin(1:2:end),<span class="string">'char'</span>));
+<span class="keyword">if</span> ~( v152 || v153 ),v019.message=[<span class="string">'The second input (options) is expected to be either a struct, '</span>,<span class="string">'or consist of Name,Value pairs.'</span>];
+v019.identifier=<span class="string">'HJW:readfile:incorrect_input_options'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v153,<span class="keyword">for</span> v003=1:2:numel(varargin),<span class="keyword">try</span> v090.(varargin{v003})=varargin{v003+1};<span class="keyword">catch</span>,v019.message=<span class="string">'Parsing of Name,Value pairs failed.'</span>;
+v019.identifier=<span class="string">'HJW:readfile:incorrect_input_NameValue'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">else</span>,v090=varargin{1};<span class="keyword">end</span>,v150=fieldnames(v090);<span class="keyword">for</span> v141=1:numel(v150)
+v154=v150{v141};v155=v090.(v154);v019.identifier=[<span class="string">'HJW:readfile:incorrect_input_opt_'</span> lower(v154)];<span class="keyword">switch</span> v154,<span class="keyword">case</span> <span class="string">'UseURLread'</span>
+[v156,v155]=f22(v155);<span class="keyword">if</span> ~v156,v019.message=<span class="string">'UseURLread should be either true or false'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,v090.UseURLread=v155 || v151.UseURLread;
+<span class="keyword">case</span> <span class="string">'err_on_ANSI'</span>,[v156,v155]=f22(v155);<span class="keyword">if</span> ~v156,v019.message=<span class="string">'err_on_ANSI should be either true or false'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,v090.show_UTF_err=v155;
+<span class="keyword">case</span> <span class="string">'print_to_fid'</span>,<span class="keyword">if</span> isempty(v155),v090.print_2_fid.boolean=false;<span class="keyword">else</span>,v090.print_2_fid.boolean=true;<span class="keyword">try</span> v157=ftell(v155);<span class="keyword">catch</span>,v157=-1;<span class="keyword">end</span>
+<span class="keyword">if</span> v155~=1 &amp;&amp; v157==-1,v019.message=[<span class="string">'Invalid print_to_fid parameter: '</span>,<span class="string">'should be a valid file identifier or 1'</span>];
+<span class="keyword">return</span>,<span class="keyword">end</span>,v090.print_2_fid.fid=v155;<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'print_to_obj'</span>,<span class="keyword">if</span> isempty(v155)
+v090.print_2_obj.boolean=false;<span class="keyword">else</span>,v090.print_2_obj.boolean=true;<span class="keyword">try</span> v051=get(v155,<span class="string">'String'</span>);set(v155,<span class="string">'String'</span>,<span class="string">''</span>);set(v155,<span class="string">'String'</span>,v051);
+v090.print_2_obj.obj=v155;<span class="keyword">catch</span>,v019.message=[<span class="string">'Invalid print_to_obj parameter: '</span>,<span class="string">'should be a handle to an object with a writeable String property'</span>];
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'print_to_con'</span>,[v156,v090.print_2_con]=f22(v155);<span class="keyword">if</span> ~v156,v019.message=<span class="string">'print_to_con should be either true or false'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v090,<span class="string">'print_2_con'</span>) &amp;&amp;( isfield(v090,<span class="string">'print_2_fid'</span>) || isfield(v090,<span class="string">'print_2_obj'</span>) ),v090.print_2_con=false;
+<span class="keyword">end</span>,v150=fieldnames(v151);<span class="keyword">for</span> v141=1:numel(v150),<span class="keyword">if</span> ~isfield(v090,v150(v141)),v090.(v150{v141})=v151.(v150{v141});<span class="keyword">end</span>,<span class="keyword">end</span>,v017=true;v019=[];<span class="keyword">end</span>
+<span class="keyword">function</span> v023=f21(v023),<span class="keyword">if</span> exist(<span class="string">'strtrim'</span>,<span class="string">'builtin'</span>),v023=strtrim(v023);<span class="keyword">else</span>,<span class="keyword">if</span> numel(v023)==0,<span class="keyword">return</span>,<span class="keyword">end</span>,v130=isspace(v023);<span class="keyword">if</span> v130(end)
+v075=find(~v130);<span class="keyword">if</span> isempty(v075),v023=<span class="string">''</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,v023((v075(end)+1):end)=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">if</span> isempty(v023),<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v130(1),v075=find(~v130);
+v023(1:(v075(1)-1))=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">end</span>,v158=inf;<span class="keyword">while</span> v158~=0,v159=length(v023);v023=strrep(v023,<span class="string">'  '</span>,<span class="string">' '</span>);v160=length(v023);v158=v159-v160;<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v161,v162]=f22(v162),<span class="keyword">persistent</span> v163,<span class="keyword">if</span> isempty(v163),v163={true,false;1,0;<span class="string">'on'</span>,<span class="string">'off'</span>};
+<span class="keyword">try</span> v163(end+1,:)=eval(<span class="string">'{"on","off"}'</span>);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v161=true;<span class="keyword">try</span> <span class="keyword">for</span> v003=1:size(v163,1),<span class="keyword">for</span> v078=1:2,<span class="keyword">if</span> isequal(v162,v163{v003,v078})
+v162=v163{1,v078};<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> isa(v162,<span class="string">'matlab.lang.OnOffSwitchState'</span>),v162=logical(v162);<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">catch</span>,<span class="keyword">end</span>,v161=false;<span class="keyword">end</span>
+<span class="keyword">function</span> v121=f23(v010),<span class="keyword">if</span> ~( isempty(v010) || exist(v010,<span class="string">'dir'</span>) ),v121=false;<span class="keyword">return</span>
+<span class="keyword">end</span>,v150=<span class="string">''</span>;<span class="keyword">while</span> isempty(v150) || exist(v150,<span class="string">'file'</span>),[v033,v150]=fileparts(f24(<span class="string">'write_permission_test_'</span>,<span class="string">'.txt'</span>));v150=fullfile(v010,v150);
+<span class="keyword">end</span>,<span class="keyword">try</span> v117=fopen(v150,<span class="string">'w'</span>);fprintf(v117,<span class="string">'test'</span>);fclose(v117);delete(v150);v121=true;<span class="keyword">catch</span>,<span class="keyword">try</span> delete(v150);<span class="keyword">catch</span>,<span class="keyword">end</span>,v121=false;<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v023=f24(v164,v118)
+<span class="keyword">if</span> nargin&lt;1,v164=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">if</span> ~isempty(v164),v164=[v164 <span class="string">'_'</span>];<span class="keyword">end</span>,<span class="keyword">if</span> nargin&lt;2,v118=<span class="string">''</span>;<span class="keyword">else</span>,<span class="keyword">if</span> ~strcmp(v118(1),<span class="string">'.'</span>),v118=[<span class="string">'.'</span> v118];<span class="keyword">end</span>,<span class="keyword">end</span>
+v023=tempname;[v165,v010]=fileparts(v023);v023=fullfile(v165,[v164 v010 v118]);<span class="keyword">end</span>
+<span class="keyword">function</span> v023=f25(v166,v167),<span class="keyword">persistent</span> v144,<span class="keyword">if</span> isempty(v144),v144 = exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>) ~= 0;<span class="keyword">end</span>,<span class="keyword">if</span> nargin==1,v167=~v144;
+<span class="keyword">end</span>,<span class="keyword">if</span> v167,<span class="keyword">if</span> all(v166&lt;65536),v023=uint16(v166);v023=reshape(v023,1,numel(v023));<span class="keyword">else</span>,[v168,v033,v169]=unique(v166);v023=cell(1,numel(v166));
+<span class="keyword">for</span> v003=1:numel(v168),v170=f26(v168(v003));v170=uint16(v170);v023(v169==v003)={v170};<span class="keyword">end</span>,v023=cell2mat(v023);<span class="keyword">end</span>,<span class="keyword">if</span> ~v144,v023=char(v023);
+<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> all(v166&lt;128),v023=char(v166);v023=reshape(v023,1,numel(v023));<span class="keyword">else</span>,[v168,v033,v169]=unique(v166);v023=cell(1,numel(v166));
+<span class="keyword">for</span> v003=1:numel(v168),v170=f27(v168(v003));v170=uint8(v170);v023(v169==v003)={v170};<span class="keyword">end</span>,v023=cell2mat(v023);v023=char(v023);<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v023=f26(v166)
+<span class="keyword">if</span> v166&lt;65536,v023=v166;<span class="keyword">return</span>,<span class="keyword">end</span>,v171=double(v166)-65536;v171=dec2bin(v171,20);v023=bin2dec([<span class="string">'110110'</span> v171(1:10);<span class="string">'110111'</span> v171(11:20)]).';<span class="keyword">end</span>
+<span class="keyword">function</span> v023=f27(v166)
+<span class="keyword">if</span> v166&lt;128,v023=v166;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">persistent</span> v172,<span class="keyword">if</span> isempty(v172),v172=struct;v172.limits.lower=hex2dec({<span class="string">'0000'</span>,<span class="string">'0080'</span>,<span class="string">'0800'</span>, <span class="string">'10000'</span>});
+v172.limits.upper=hex2dec({<span class="string">'007F'</span>,<span class="string">'07FF'</span>,<span class="string">'FFFF'</span>,<span class="string">'10FFFF'</span>});v172.scheme{2}=<span class="string">'110xxxxx10xxxxxx'</span>;v172.scheme{2}=reshape(v172.scheme{2}.',8,2);
+v172.scheme{3}=<span class="string">'1110xxxx10xxxxxx10xxxxxx'</span>;v172.scheme{3}=reshape(v172.scheme{3}.',8,3);v172.scheme{4}=<span class="string">'11110xxx10xxxxxx10xxxxxx10xxxxxx'</span>;
+v172.scheme{4}=reshape(v172.scheme{4}.',8,4);<span class="keyword">for</span> v134=2:4,v172.scheme_pos{v134}=find(v172.scheme{v134}==<span class="string">'x'</span>);
+v172.bits(v134)=numel(v172.scheme_pos{v134});<span class="keyword">end</span>,<span class="keyword">end</span>,v173=find(v172.limits.lower&lt;v166 &amp; v166&lt;v172.limits.upper);
+v023=v172.scheme{v173};v174=v172.scheme_pos{v173};v134=dec2bin(v166,v172.bits(v173));v023(v174)=v134;v023=bin2dec(v023.').';<span class="keyword">end</span>
+<span class="keyword">function</span> [v166,v026,v175]=f28(v176,v148),<span class="keyword">if</span> nargin&lt;2,v148=[];<span class="keyword">end</span>,v177= nargout==1 ;v176=uint32(v176);[v175,v036,v019]=f29(v176,v177);
+<span class="keyword">if</span> strcmp(v036,<span class="string">'success'</span>),v026=true;v166=v175;<span class="keyword">elseif</span> strcmp(v036,<span class="string">'error'</span>),v026=false;<span class="keyword">if</span> v177,f06(v148,v019),<span class="keyword">end</span>,v166=v176;<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v176,v036,v019]=f29(v176,v177),v036=<span class="string">'success'</span>;v019=struct(<span class="string">'identifier'</span>,<span class="string">'HJW:UTF8_to_unicode:notUTF8'</span>,<span class="string">'message'</span>,<span class="string">'Input is not UTF-8.'</span>);
+<span class="keyword">persistent</span> v144,<span class="keyword">if</span> isempty(v144),v144 = exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>) ~= 0;<span class="keyword">end</span>,<span class="keyword">if</span> any(v176&gt;255),v036=<span class="string">'error'</span>;
+<span class="keyword">if</span> v177,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">elseif</span> all(v176&lt;128),<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">for</span> v173=4:-1:2,v162=bin2dec([repmat(<span class="string">'1'</span>,1,v173) repmat(<span class="string">'0'</span>,1,8-v173)]);v178=v176&gt;=v162 &amp; v176&lt;256;
+<span class="keyword">if</span> any(v178),v178=find(v178);v178=v178(:).';<span class="keyword">if</span> numel(v176)&lt;(max(v178)+v173-1),v036=<span class="string">'error'</span>;<span class="keyword">if</span> v177,<span class="keyword">return</span>,<span class="keyword">end</span>,v178( (v178+v173-1)&gt;numel(v176) )=[];<span class="keyword">end</span>
+<span class="keyword">if</span> ~isempty(v178),v075=f01(v178 , (0:(v173-1)).' );v075=v075.';v178=v176(v075);<span class="keyword">end</span>,<span class="keyword">else</span>,v178=[];<span class="keyword">end</span>,v179=[repmat(<span class="string">'1'</span>,1,v173-1) repmat(<span class="string">'10'</span>,1,v173)];
+v180=unique([1:(v173+1) 1:8:(8*v173) 2:8:(8*v173)]);<span class="keyword">if</span> numel(v178)&gt;0,v178=unique(v178,<span class="string">'rows'</span>);v181=mat2cell(v178,ones(size(v178,1),1),v173);
+<span class="keyword">for</span> v003=1:numel(v181),v182=dec2bin(double(v181{v003}))';<span class="keyword">if</span> ~strcmp(v179,v182(v180)),v036=<span class="string">'error'</span>;<span class="keyword">if</span> v177,<span class="keyword">return</span>,<span class="keyword">end</span>
+<span class="keyword">continue</span>,<span class="keyword">end</span>,v182(v180)=<span class="string">''</span>;<span class="keyword">if</span> ~v144,v183=uint32(bin2dec(v182 ));<span class="keyword">else</span>,v183=uint32(bin2dec(v182.'));<span class="keyword">end</span>,v176=f17(v176,v181{v003},v183);<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> f30(v090,varargin),<span class="keyword">if</span> isempty(v090),v090=struct;<span class="keyword">end</span>
+<span class="keyword">if</span> ~isfield(v090,<span class="string">'con'</span>),v090.con=false;<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v090,<span class="string">'fid'</span>),v090.fid.boolean=false;<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v090,<span class="string">'obj'</span>),v090.obj.boolean=false;<span class="keyword">end</span>
+<span class="keyword">if</span> nargin==2 || ~isempty(strfind(varargin{1},<span class="string">'%'</span>)),[v093,v094]=deal(<span class="string">''</span>,varargin{1});<span class="keyword">if</span> nargin&gt;3,v096=varargin(2:end);v094=sprintf(v094,v096{:});
+<span class="keyword">end</span>,<span class="keyword">else</span>,[v093,v094]=deal(varargin{1},varargin{2});<span class="keyword">if</span> nargin&gt;3,v096=varargin(3:end);v094=sprintf(v094,v096{:});<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v090.con,<span class="keyword">if</span> ~isempty(v093)
+warning(v093,<span class="string">'%s'</span>,v094),<span class="keyword">else</span>,warning(v094),<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> ~isempty(v093),lastwarn(v094,v093);<span class="keyword">else</span>,lastwarn(v094),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v090.obj.boolean
+v097=v094;<span class="keyword">while</span> v097(end)==10,v097(end)=[];<span class="keyword">end</span>,<span class="keyword">if</span> any(v097==10),v097=regexp_outkeys([<span class="string">'Warning: '</span> v097],char(10),<span class="string">'split'</span>);<span class="keyword">else</span>,v097=[<span class="string">'Warning: '</span> v097];
+<span class="keyword">end</span>,set(v090.obj.obj,<span class="string">'String'</span>,v097),<span class="keyword">end</span>,<span class="keyword">if</span> v090.fid.boolean,v098=2;v092=f07(v098);fprintf(v090.fid.fid,<span class="string">'Warning: %s\n%s'</span>,v094,v092);<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v107=f31,v107=f08(2);<span class="keyword">if</span> isempty(v107),v107=f08(1);<span class="keyword">if</span> isempty(v107),v107=0;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v184,v185]=f32(v030)
+shift=[ 1000, 0, 0, 0, 0, 0;100 , 0, 0, 0, 0, 0;10 , 0, 0, 0, 0, 0;1 , 0, 0, 0, 0, 0;0 ,10, 0, 0, 0, 0;0 , 1, 0, 0, 0, 0;0 , 0,10, 0, 0, 0;0 , 0, 1, 0, 0, 0;0 , 0, 0,10, 0, 0;0 , 0, 0, 1, 0, 0;0 , 0, 0, 0,10, 0;0 , 0, 0, 0, 1, 0;0 , 0, 0, 0, 0,10;0 , 0, 0, 0, 0, 1];
+v187=char(zeros(1,14)+<span class="string">'0'</span>);
+v187(1:numel(v030))=v030;v187={v187(1:4),v187(5:6),v187(7:8),v187(9:10),v187(11:12),v187(13:14)};v187=str2double(v187);v187(1:3)=max(v187(1:3),1);
+v188=num2cell(v187);v188=datenum(v188{:});v122=datestr(v188,<span class="string">'yyyymmddTHHMMSS'</span>);v122(9)=<span class="string">''</span>;<span class="keyword">if</span> ~strcmp(v122(1:numel(v030)),v030)
+error(<span class="string">'incorrect date_part format'</span>),<span class="keyword">end</span>,v189=v187+shift(numel(v030),:);v190=[31 28 31 30 31 30 31 31 30 31 30 31];
+v191=v189(1);<span class="keyword">if</span> rem(v191,4)==0 &amp;&amp; (rem(v191,100)~=0 || rem(v191,400)==0),v190(2) = 29;<span class="keyword">end</span>,v190=v190(min(12,v189(2)));
+v192=find(v189&gt;[inf 12 v190 23 59 59])+1;<span class="keyword">if</span> ~isempty(v192),v189(v192:end)=inf;<span class="keyword">else</span>,v189(end)=-1;<span class="keyword">end</span>,v189=min(v189,[inf 12 v190 23 59 59]);
+v189=num2cell(v189);v189=datenum(v189{:});v185=(v188+v189)/2;v185=datestr(v185,<span class="string">'yyyymmddTHHMMSS'</span>);v185(9)=<span class="string">''</span>;v184=[v188 v189];<span class="keyword">end</span>
+<span class="keyword">function</span> [v017,v090,v019]=f33(v016,v147,varargin),v017=false;v090=struct;
+v019=struct(<span class="string">'identifier'</span>,<span class="string">''</span>,<span class="string">'message'</span>,<span class="string">''</span>);<span class="keyword">if</span> ~ischar(v016) || numel(v016)==0,v019.message=<span class="string">'The first input (filename) is not char and/or empty.'</span>;
+v019.identifier=<span class="string">'HJW:WBM:incorrect_input_filename'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">if</span> ~ischar(v147) || numel(v147)==0
+v019.message=<span class="string">'The second input (url) is not char and/or empty.'</span>;v019.identifier=<span class="string">'HJW:WBM:incorrect_input_url'</span>;<span class="keyword">return</span>
+<span class="keyword">end</span>,<span class="keyword">persistent</span> v151 v193,v194=false;<span class="keyword">if</span> isempty(v151),v151.date_part=<span class="string">'2'</span>;v151.tries=[5 4 4];v151.response={ <span class="string">'tx'</span>,404,<span class="string">'load'</span>;<span class="string">'txtx'</span>,[404 404],<span class="string">'save'</span>;
+<span class="string">'tx'</span>,403,<span class="string">'save'</span>;<span class="string">'t2t2'</span>,[403 403],<span class="string">'exit'</span>;<span class="string">'tx'</span>,429,<span class="string">'pause_retry'</span> };v151.ignore=4080;v151.verbose=3;v151.m_date_r=1;v151.flag=<span class="string">'*'</span>;
+v151.UseLocalTime=false;v151.UseURLwrite=isempty(which(<span class="string">'websave'</span>));v151.err429=struct(<span class="string">'CountsAsTry'</span>,false,<span class="string">'TimeToWait'</span>,15,<span class="string">'PrintAtVerbosityLevel'</span>,3);
+v151.print_2_con=true;v151.print_2_fid.boolean=false;v151.print_2_obj.boolean=false;[v184,v185]=f32(v151.date_part);
+v151.date_part=v185;v151.date_bounds.datenum=v184;v155={datestr(v184(1),<span class="string">'yyyymmddTHHMMSS'</span>),datestr(v184(2),<span class="string">'yyyymmddTHHMMSS'</span>)};
+v155{1}(9)=<span class="string">''</span>;v155{2}(9)=<span class="string">''</span>;v151.date_bounds.double=[str2double(v155{1}) str2double(v155{2})];v193=f35;<span class="keyword">end</span>,<span class="keyword">if</span> nargin==2
+v090=v151;v017=true;<span class="keyword">return</span>,<span class="keyword">end</span>,v152=nargin==3 &amp;&amp; isa(varargin{1},<span class="string">'struct'</span>);v153=mod(nargin,2)==0 &amp;&amp;all(cellfun(<span class="string">'isclass'</span>,varargin(1:2:end),<span class="string">'char'</span>));
+<span class="keyword">if</span> ~( v152 || v153 ),v019.message=[<span class="string">'The third input (options) is expected to be either a struct, '</span>,<span class="string">'or consist of Name,Value pairs.'</span>];
+v019.identifier=<span class="string">'HJW:WBM:incorrect_input_options'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v153,<span class="keyword">for</span> v003=1:2:numel(varargin),<span class="keyword">try</span> v090.(varargin{v003})=varargin{v003+1};
+<span class="keyword">catch</span>,v019.message=<span class="string">'Parsing of Name,Value pairs failed.'</span>;v019.identifier=<span class="string">'HJW:WBM:incorrect_input_NameValue'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">else</span>,v090=varargin{1};
+<span class="keyword">end</span>,v150=fieldnames(v090);<span class="keyword">for</span> v141=1:numel(v150),v154=v150{v141};v155=v090.(v154);v019.identifier=[<span class="string">'HJW:WBM:incorrect_input_opt_'</span> lower(v154)];
+<span class="keyword">switch</span> v154,<span class="keyword">case</span> <span class="string">'date_part'</span>,v195=true;<span class="keyword">if</span> ~ischar(v155) || numel(v155)==0 || numel(v155)&gt;14 || any(v155&lt;48 &amp; v155&gt;57),v195=false;
+<span class="keyword">end</span>,<span class="keyword">try</span> [v184,v185]=f32(v155);<span class="keyword">catch</span>,v195=false;<span class="keyword">end</span>,<span class="keyword">if</span> ~v195,v019.message=<span class="string">'The value of options.date_part is empty or not a valid numeric char.'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,v090.date_part=v185;v090.date_bounds.datenum=v184;<span class="keyword">case</span> <span class="string">'tries'</span>,<span class="keyword">if</span> ~isnumeric(v155) || numel(v155)~=3 || any(isnan(v155))
+v019.message=[<span class="string">'The value of options.tries has an incorrect format.'</span>,char(10),<span class="string">'The value should be a numeric vector with 3 integer elements.'</span>];
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'response'</span>,<span class="keyword">if</span> f34(v155),v019.message=<span class="string">'The value of options.response has an incorrect format.'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'ignore'</span>,<span class="keyword">if</span> ~isnumeric(v155) || numel(v155)==0 || any(isnan(v155))
+v019.message=[<span class="string">'The value of options.ignore has an incorrect format.'</span>,char(10),<span class="string">'The value should be a numeric vector with HTML error codes.'</span>];
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'verbose'</span>,<span class="keyword">if</span> ~isnumeric(v155) || numel(v155)~=1 || double(v155)~=round(double(v155))
+v019.message=<span class="string">'The value of options.verbose is not an integer scalar.'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'m_date_r'</span>,<span class="keyword">if</span> ~ischar(v155) || numel(v155)==0
+v019.message=<span class="string">'Options.m_date_r should be ''ignore'', ''warning'', or ''error''.'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,v194=true;<span class="keyword">switch</span> lower(v155),<span class="keyword">case</span> <span class="string">'ignore'</span>
+v155=0;<span class="keyword">case</span> <span class="string">'warning'</span>,v155=1;<span class="keyword">case</span> <span class="string">'error'</span>,v155=2;<span class="keyword">otherwise</span>,v019.message=<span class="string">'Options.m_date_r should be ''ignore'', ''warning'', or ''error''.'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,v090.m_date_r=v155;<span class="keyword">case</span> <span class="string">'flag'</span>,<span class="keyword">if</span> ischar(v155)&amp;&amp;numel(v155)~=0&amp;&amp;~ismember({v155},{<span class="string">'*'</span>,<span class="string">'id'</span>,<span class="string">'js'</span>,<span class="string">'cs'</span>,<span class="string">'im'</span>,<span class="string">'if'</span>,<span class="string">'fw'</span>})
+v019.message=<span class="string">'Invalid flag. Must be a char with *, id, js, cs, im, fw, or if.'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'UseLocalTime'</span>,[v156,v090.UseLocalTime]=f22(v155);<span class="keyword">if</span> ~v156,v019.message=<span class="string">'UseLocalTime should be either true or false'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'UseURLwrite'</span>,[v156,v155]=f22(v155);<span class="keyword">if</span> ~v156,v019.message=<span class="string">'UseURLwrite should be either true or false'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,v090.UseURLwrite=v155 || v151.UseURLwrite;<span class="keyword">case</span> <span class="string">'err429'</span>,<span class="keyword">if</span> ~isa(v155,<span class="string">'struct'</span>),v019.message=<span class="string">'The err429 parameter should be a struct.'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,v090.err429=v151.err429;v196=fieldnames(v155);<span class="keyword">for</span> v003=1:numel(v196),v197=v155.(v196{v003});<span class="keyword">switch</span> lower(v196{v003})
+<span class="keyword">case</span> <span class="string">'countsastry'</span>,[v156,v197]=f22(v197);<span class="keyword">if</span> ~v156,v019.message=[<span class="string">'Invalid field CountsAsTry in the err429 parameter: '</span>,<span class="string">'should be a logical scalar.'</span>];
+<span class="keyword">return</span>,<span class="keyword">end</span>,v090.err429.CountsAsTry=v197;<span class="keyword">case</span> <span class="string">'timetowait'</span>
+<span class="keyword">if</span> ~isnumeric(v197) || numel(v197)~=1,v019.message=[<span class="string">'Invalid field TimeToWait in the err429 parameter: '</span>,<span class="string">'should be a numeric scalar.'</span>];
+<span class="keyword">return</span>,<span class="keyword">end</span>,v090.err429.TimeToWait=double(v197);<span class="keyword">case</span> <span class="string">'printatverbositylevel'</span>,<span class="keyword">if</span> ~isnumeric(v197) || numel(v197)~=1 ||double(v197)~=round(double(v197))
+v019.message=[<span class="string">'Invalid field PrintAtVerbosityLevel in the err429 '</span>,<span class="string">'parameter: should be a scalar double integer.'</span>];
+<span class="keyword">return</span>,<span class="keyword">end</span>,v090.err429.PrintAtVerbosityLevel=v197;
+<span class="keyword">otherwise</span>,warning(<span class="string">'HJW:WBM:NameValue_not_found'</span>,[<span class="string">'Name,Value pair not '</span>,<span class="string">'recognized during parsing of err429 parameter: %s'</span>],v196{v003});
+<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'print_to_fid'</span>,<span class="keyword">if</span> isempty(v155),v090.print_2_fid.boolean=false;<span class="keyword">else</span>,v090.print_2_fid.boolean=true;<span class="keyword">try</span> v157=ftell(v155);<span class="keyword">catch</span>,v157=-1;<span class="keyword">end</span>
+<span class="keyword">if</span> v155~=1 &amp;&amp; v157==-1,v019.message=[<span class="string">'Invalid print_to_fid parameter: '</span>,<span class="string">'should be a valid file identifier or 1.'</span>];
+<span class="keyword">return</span>,<span class="keyword">end</span>,v090.print_2_fid.fid=v155;<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'print_to_obj'</span>,<span class="keyword">if</span> isempty(v155)
+v090.print_2_obj.boolean=false;<span class="keyword">else</span>,v090.print_2_obj.boolean=true;<span class="keyword">try</span> v051=get(v155,<span class="string">'String'</span>);set(v155,<span class="string">'String'</span>,<span class="string">''</span>);set(v155,<span class="string">'String'</span>,v051);
+v090.print_2_obj.obj=v155;<span class="keyword">catch</span>,v019.message=[<span class="string">'Invalid print_to_obj parameter: '</span>,<span class="string">'should be a handle to an object with a writeable String property'</span>];
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">case</span> <span class="string">'print_to_con'</span>,[v156,v090.print_2_con]=f22(v155);<span class="keyword">if</span> ~v156,v019.message=<span class="string">'print_to_con should be either true or false'</span>;
+<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">otherwise</span>,v019.message=sprintf(<span class="string">'Name,Value pair not recognized: %s'</span>,v154);v019.identifier=<span class="string">'HJW:WBM:incorrect_input_NameValue'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>
+<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v090,<span class="string">'print_2_con'</span>) &amp;&amp;( isfield(v090,<span class="string">'print_2_fid'</span>) || isfield(v090,<span class="string">'print_2_obj'</span>) ),v090.print_2_con=false;<span class="keyword">end</span>,v150=fieldnames(v151);
+<span class="keyword">for</span> v141=1:numel(v150),<span class="keyword">if</span> ~isfield(v090,v150(v141)),v090.(v150{v141})=v151.(v150{v141});<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">try</span> v198=f31;<span class="keyword">catch</span>,errordlg(v193.errordlg_text{:})
+v019=v193.ME;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v090.UseLocalTime,v199=v198-now;v199=round(v199*24*4)/(24*4);v090.date_bounds.datenum=v090.date_bounds.datenum-v199;
+v184=v090.date_bounds.datenum;<span class="keyword">else</span>,v184=v090.date_bounds.datenum;<span class="keyword">end</span>,v155={datestr(v184(1),<span class="string">'yyyymmddTHHMMSS'</span>),datestr(v184(2),<span class="string">'yyyymmddTHHMMSS'</span>)};
+v155{1}(9)=<span class="string">''</span>;v155{2}(9)=<span class="string">''</span>;v090.date_bounds.double=[str2double(v155{1}) str2double(v155{2})];
+<span class="keyword">if</span> ~( v184(1)&lt;=v198 &amp;&amp; v198&lt;=v184(2) ),v090.tries(2)=0;<span class="keyword">end</span>,<span class="keyword">if</span> v090.m_date_r==2 &amp;&amp; ~strcmp(v090.flag,<span class="string">'*'</span>)
+v019.message=[<span class="string">'m_date_r set to ''error'' and the flag set to something other than ''*'' will'</span>,<span class="string">' by definition'</span>,char(10),<span class="string">'cause an error, as the downloaded pages will not contain'</span>,<span class="string">' any dates.'</span>,char(10),<span class="string">'See the help text for a work-around for images.'</span>];
+v019.identifier=<span class="string">'HJW:WBM:IncompatibleInputs'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">if</span> ~v194 &amp;&amp; ~strcmp(v090.flag,<span class="string">'*'</span>),v090.m_date_r=0;<span class="keyword">end</span>,v017=true;v019=[];<span class="keyword">end</span>
+<span class="keyword">function</span> v200=f34(v032),v200=false;<span class="keyword">if</span> ~iscell(v032) || isempty(v032) || size(v032,2)~=3,v200=true;<span class="keyword">return</span>
+<span class="keyword">end</span>,<span class="keyword">for</span> v201=1:size(v032,1),v155=v032{v201,1};v202=numel(v155(2:2:end));<span class="keyword">if</span> ~ischar(v155) || numel(v155)==0 || ~all(ismember(v155(2:2:end),<span class="string">'12x'</span>))
+v200=true;<span class="keyword">return</span>,<span class="keyword">end</span>,v155=v032{v201,2};<span class="keyword">if</span> ~isa(v155,<span class="string">'double'</span>) || numel(v155)~=v202
+v200=true;<span class="keyword">return</span>,<span class="keyword">end</span>,v155=v032{v201,3};<span class="keyword">if</span> ~ischar(v155) || ~ismember({v155},{<span class="string">'load'</span>,<span class="string">'save'</span>,<span class="string">'exit'</span>,<span class="string">'pause_retry'</span>}),v200=true;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v203=f35,<span class="keyword">persistent</span> v193,<span class="keyword">if</span> isempty(v193) || v193.boolean
+v193=struct;v193.boolean=true;v193.errordlg_text={{[<span class="string">'The WBM function relies on a compiled c function to get the current time in UTC '</span>.';
+<span class="string">'when offline or for Matlab 6.5. The automatic compiling mechanism appears to have '</span>.';
+<span class="string">'failed. Please manually make sure utc_time.c is compiled for your system.'</span>.'].'},<span class="string">'utc_time.c compile failed'</span>};
+	v193.ME.message=<span class="string">'Retrieval of UTC failed.'</span>;v193.ME.identifier=<span class="string">'HJW:WBM:UTC_missing'</span>;<span class="keyword">try</span> <span class="keyword">if</span> abs(f31-now)&gt;(14.1/24)
+error(<span class="string">'HJW:WBM:getUTCfail'</span>,[<span class="string">'The getUTC function failed,'</span>,char(10),<span class="string">'or the '</span>,<span class="string">'difference between now() and the UTC time is more than a day.'</span>,char(10),<span class="string">'The '</span>,<span class="string">'getUTC function requires either internet access or folder write access.'</span>])
+<span class="keyword">end</span>,<span class="keyword">catch</span>,errordlg(v193.errordlg_text{:}),error(v193.ME.identifier,v193.ME.message),<span class="keyword">end</span>,v193.boolean=false;<span class="keyword">end</span>,v203=v193;<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% ComputeNonCryptHash performance test
+%
+% <html><tt style="font-size:0%">Performance test for the ComputeNonCryptHash function.</tt>
+% <div style="margin-top:-5em;color:grey">Compute a non-cryptographic hash
+% </div><br>
+% The test at the bottom of this page was used to determine the performance of the
+% ComputeNonCryptHash function. The test results shown in the tables below are normalized to the
+% results of the newest Matlab release on Windows, since the performace is strongly dependent on
+% the specific computer running the test. To allow absolute comparisons as well the results in that
+% cell are shown in seconds.
+% <br>
+% <br>Note that Ubuntu and MacOS results were obtained in a VM, so the performance is likely an
+% underestimation of the true performance.
+% <br>
+% <br>The results below were determined with the default setting of 256 bits. Performance does not
+% scale linearly with the number of bits.
+% </html>
+
+%% 10000 English words
+% 
+% <html>
+% <table>
+% <tr>
+% <td> Normalized timing </td>
+% <td style="border:2px solid black;"> Windows 10 </td>
+% <td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+% <td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2020b </td>
+% <td> <it>(0.601 seconds)</it> </td>
+% <td>-</td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2018a </td>
+% <td> 118% </td>
+% <td> 106% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2015a </td>
+% <td> 921% </td>
+% <td> 825% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2011a </td>
+% <td> 602% </td>
+% <td> 575% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+% <td> 389% </td>
+% <td>-</td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 5.2.0 </td>
+% <td> 1&thinsp;690% </td>
+% <td> 1&thinsp;263% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 4.4.1 </td>
+% <td> 1&thinsp;702% </td>
+% <td>-</td>
+% <td> 2&thinsp;858% </td>
+% </tr>
+% </table>
+% </html>
+
+function [timing,description]=test_1
+description='%d English words';
+N=10000;
+Words=get_persistent('Words','load',N);
+then=now;for n=1:N,ComputeNonCryptHash(Words{n},128);end,timing=(now-then)*(24*60*60);
+description=sprintf(description,N);
+end
+
+%% 1 to 1e4 (in char format)
+% 
+% <html>
+% <table>
+% <tr>
+% <td> Normalized timing </td>
+% <td style="border:2px solid black;"> Windows 10 </td>
+% <td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+% <td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2020b </td>
+% <td> <it>(0.580 seconds)</it> </td>
+% <td>-</td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2018a </td>
+% <td> 115% </td>
+% <td> 107% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2015a </td>
+% <td> 952% </td>
+% <td> 854% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2011a </td>
+% <td> 630% </td>
+% <td> 597% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+% <td> 393% </td>
+% <td>-</td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 5.2.0 </td>
+% <td> 1&thinsp;765% </td>
+% <td> 1&thinsp;312% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 4.4.1 </td>
+% <td> 1&thinsp;768% </td>
+% <td>-</td>
+% <td> 2&thinsp;974% </td>
+% </tr>
+% </table>
+% </html>
+
+function [timing,description]=test_2
+description='1 to 1e%d (in char format)';
+E=4;
+persistent Numbers N
+if isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=cell(1,N);
+    for n=1:numel(Numbers),Numbers{n}=sprintf('%d',n);end
+end
+then=now;for n=1:N,ComputeNonCryptHash(Numbers{n},128);end,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+end
+
+%% 1 to 1e4 (in double format)
+% 
+% <html>
+% <table>
+% <tr>
+% <td> Normalized timing </td>
+% <td style="border:2px solid black;"> Windows 10 </td>
+% <td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+% <td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2020b </td>
+% <td> <it>(0.652 seconds)</it> </td>
+% <td>-</td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2018a </td>
+% <td> 113% </td>
+% <td> 105% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2015a </td>
+% <td> 860% </td>
+% <td> 772% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2011a </td>
+% <td> 569% </td>
+% <td> 543% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+% <td> 376% </td>
+% <td>-</td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 5.2.0 </td>
+% <td> 1&thinsp;576% </td>
+% <td> 1&thinsp;173% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 4.4.1 </td>
+% <td> 1&thinsp;587% </td>
+% <td>-</td>
+% <td> 2&thinsp;679% </td>
+% </tr>
+% </table>
+% </html>
+
+function [timing,description]=test_3
+description='1 to 1e%d (in double format)';
+E=4;
+persistent Numbers N
+if isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=num2cell(1:N);
+end
+then=now;for n=1:N,ComputeNonCryptHash(Numbers{n},128);end,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+end
+
+%% 1 to 1e4 (in uint16 format)
+% 
+% <html>
+% <table>
+% <tr>
+% <td> Normalized timing </td>
+% <td style="border:2px solid black;"> Windows 10 </td>
+% <td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+% <td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2020b </td>
+% <td> <it>(0.476 seconds)</it> </td>
+% <td>-</td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2018a </td>
+% <td> 117% </td>
+% <td> 102% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2015a </td>
+% <td> 1&thinsp;079% </td>
+% <td> 945% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2011a </td>
+% <td> 701% </td>
+% <td> 648% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+% <td> 423% </td>
+% <td>-</td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 5.2.0 </td>
+% <td> 1&thinsp;495% </td>
+% <td> 1&thinsp;103% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 4.4.1 </td>
+% <td> 1&thinsp;500% </td>
+% <td>-</td>
+% <td> 2&thinsp;521% </td>
+% </tr>
+% </table>
+% </html>
+
+function [timing,description]=test_4
+description='1 to 1e%d (in uint16 format)';
+E=4;
+persistent Numbers N
+if isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=num2cell(uint16(1:N));
+end
+then=now;for n=1:N,ComputeNonCryptHash(Numbers{n},128);end,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+end
+
+%% 25 images
+% 
+% <html>
+% <table>
+% <tr>
+% <td> Normalized timing </td>
+% <td style="border:2px solid black;"> Windows 10 </td>
+% <td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+% <td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2020b </td>
+% <td> <it>(1.815 seconds)</it> </td>
+% <td>-</td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2018a </td>
+% <td> 102% </td>
+% <td> 91% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2015a </td>
+% <td> 118% </td>
+% <td> 109% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2011a </td>
+% <td> 147% </td>
+% <td> 107% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+% <td> 945% </td>
+% <td>-</td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 5.2.0 </td>
+% <td> 217% </td>
+% <td> 110% </td>
+% <td>-</td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 4.4.1 </td>
+% <td> 198% </td>
+% <td>-</td>
+% <td> 183% </td>
+% </tr>
+% </table>
+% </html>
+
+function [timing,description]=test_5
+description='%d images';
+N=25;
+IM=get_persistent('IM','load',N);
+then=now;for n=1:N,ComputeNonCryptHash(IM{n},128);end,timing=(now-then)*(24*60*60);
+description=sprintf(description,N);
+end
+
+%% Complete test run
+%
+% If you want to compare the documented performance with the performance on your own computer, you can run the code below.
+function [timing,description]=ComputeNonCryptHash_performance
+%This tester requires internet access to create files that will be loaded to persistent variables.
+%
+%The list of words is based on this list:
+%http://web.archive.org/web/20061231134037/http://www.sitopreferito.it/html/all_english_words.html
+%
+%The images are from the Stanford Dog Dataset containing 20580 images (with 89 duplicates)
+%         http://vision.stanford.edu/aditya86/ImageNetDogs/
+
+n_tests=5;timing=zeros(4,n_tests);
+description=cell(1,n_tests);
+if nargout==0,k=0;K=numel(timing);h_wait=waitbar(0,'progress');end
+for n=1:size(timing,1)
+    [timing(n,1),description{1}]=test_1;
+    if nargout==0,k=k+1;waitbar(k/K,h_wait);end
+    [timing(n,2),description{2}]=test_2;
+    if nargout==0,k=k+1;waitbar(k/K,h_wait);end
+    [timing(n,3),description{3}]=test_3;
+    if nargout==0,k=k+1;waitbar(k/K,h_wait);end
+    [timing(n,4),description{4}]=test_4;
+    if nargout==0,k=k+1;waitbar(k/K,h_wait);end
+    [timing(n,5),description{5}]=test_5;
+    if nargout==0,k=k+1;waitbar(k/K,h_wait);end
+end
+get_persistent([],'clear');
+timing=median(timing(2:end,:),1);
+if nargout==0
+    delete(h_wait)
+    fprintf('Timing results:\n')
+    for k=1:numel(timing),fprintf('%.3f seconds (test: %s)\n',timing(k),description{k});end
+    clear timing description
+end
+end
+
+function [timing,description]=test_1
+description='%d English words';
+N=10000;
+Words=get_persistent('Words','load',N);
+then=now;for n=1:N,ComputeNonCryptHash(Words{n},128);end,timing=(now-then)*(24*60*60);
+description=sprintf(description,N);
+end
+function [timing,description]=test_2
+description='1 to 1e%d (in char format)';
+E=4;
+persistent Numbers N
+if isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=cell(1,N);
+    for n=1:numel(Numbers),Numbers{n}=sprintf('%d',n);end
+end
+then=now;for n=1:N,ComputeNonCryptHash(Numbers{n},128);end,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+end
+function [timing,description]=test_3
+description='1 to 1e%d (in double format)';
+E=4;
+persistent Numbers N
+if isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=num2cell(1:N);
+end
+then=now;for n=1:N,ComputeNonCryptHash(Numbers{n},128);end,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+end
+function [timing,description]=test_4
+description='1 to 1e%d (in uint16 format)';
+E=4;
+persistent Numbers N
+if isempty(Numbers) || numel(Numbers)~=N
+    N=10^E;
+    Numbers=num2cell(uint16(1:N));
+end
+then=now;for n=1:N,ComputeNonCryptHash(Numbers{n},128);end,timing=(now-then)*(24*60*60);
+description=sprintf(description,E);
+end
+function [timing,description]=test_5
+description='%d images';
+N=25;
+IM=get_persistent('IM','load',N);
+then=now;for n=1:N,ComputeNonCryptHash(IM{n},128);end,timing=(now-then)*(24*60*60);
+description=sprintf(description,N);
+end
+function out=get_persistent(var,operation,varargin)
+%allow central loading and saving to prevent a memory hog
+persistent Words IM
+switch operation
+    case 'load'
+        if strcmp(var,'Words')
+            if nargin>2,N=varargin{1};else,N=10000;end
+            if isempty(Words),Words=get_Words(N);end
+            out=Words;
+        elseif strcmp(var,'IM')
+            if nargin>2,N=varargin{1};else,N=25;end
+            if isempty(IM),IM=download_example_images(N);end
+            out=IM;
+        else
+            error('name not recognized')
+        end
+    case 'clear'
+        Words=[];IM=[];
+end
+end
+function Words=get_Words(N)
+%store to a file in the temp folder
+fn=fullfile(tempdir,'MATLAB','FileExchange','ComputeNonCryptHash','EnglishWordList.txt');
+if ~exist(fn,'file') %load from internet
+    txt=readfile(['http://web.archive.org/web/20201006125927id_/https://cdn-140.anonfiles.com/',...
+        'B89ePdcdp9/1fa52173-1601989741/EnglishWordList.txt']);
+    if ~exist(fileparts(fn),'dir'),mkdir(fileparts(fn));end
+    txt=sprintf('%s\n',txt{:});txt(end)='';
+    fid=fopen(fn,'w');fprintf(fid,'%s',txt);fclose(fid);
+end
+txt=readfile(fn);
+for n=1:numel(txt),if strcmp(txt{n}(1),'%'),txt{n}='';end,end
+txt(cellfun('isempty',txt))=[];
+Words=txt;
+if numel(Words)~=N
+	Words=Words(unique(round(linspace(1,numel(Words),N))));%select a semi-random sample
+end
+end
+function IM=download_example_images(N)
+%download 25 images from the Stanford Dogs Dataset
+%the links allow up to 5013 images (5043 if duplicates are not removed)
+IM=cell(1,N);
+
+p1='http://web.archive.org/web';
+p2='http://vision.stanford.edu/aditya86/ImageNetDogs';
+k=0;
+%Affenpinscher up to Chesapeake Bay retriever
+k=k+1;url{k}=[p1 '/20190429035422fw_/' p2 '/n02110627.html'];
+k=k+1;url{k}=[p1 '/20190907200724fw_/' p2 '/n02088094.html'];
+k=k+1;url{k}=[p1 '/20181211003822fw_/' p2 '/n02116738.html'];
+k=k+1;url{k}=[p1 '/20190429035952fw_/' p2 '/n02096051.html'];
+k=k+1;url{k}=[p1 '/20190429035720fw_/' p2 '/n02093428.html'];
+k=k+1;url{k}=[p1 '/20190429041351fw_/' p2 '/n02107908.html'];
+k=k+1;url{k}=[p1 '/20190429040002fw_/' p2 '/n02096294.html'];
+k=k+1;url{k}=[p1 '/20190430212644fw_/' p2 '/n02110806.html'];
+k=k+1;url{k}=[p1 '/20190430212609fw_/' p2 '/n02088238.html'];
+k=k+1;url{k}=[p1 '/20190429035644fw_/' p2 '/n02088364.html'];
+k=k+1;url{k}=[p1 '/20190430215444fw_/' p2 '/n02093647.html'];
+k=k+1;url{k}=[p1 '/20190413043111fw_/' p2 '/n02107683.html'];
+k=k+1;url{k}=[p1 '/20190429035654fw_/' p2 '/n02089078.html'];
+k=k+1;url{k}=[p1 '/20190430212559fw_/' p2 '/n02086646.html'];
+k=k+1;url{k}=[p1 '/20190429035649fw_/' p2 '/n02088466.html'];
+k=k+1;url{k}=[p1 '/20181211003752fw_/' p2 '/n02088632.html'];
+k=k+1;url{k}=[p1 '/20190430215535fw_/' p2 '/n02106166.html'];
+k=k+1;url{k}=[p1 '/20190430215449fw_/' p2 '/n02093754.html'];
+k=k+1;url{k}=[p1 '/20190429035659fw_/' p2 '/n02090622.html'];
+k=k+1;url{k}=[p1 '/20181211003802fw_/' p2 '/n02096585.html'];
+k=k+1;url{k}=[p1 '/20190429035830fw_/' p2 '/n02106382.html'];
+k=k+1;url{k}=[p1 '/20190429035406fw_/' p2 '/n02108089.html'];
+k=k+1;url{k}=[p1 '/20190429035850fw_/' p2 '/n02112706.html'];
+k=k+1;url{k}=[p1 '/20190429035825fw_/' p2 '/n02105251.html'];
+k=k+1;url{k}=[p1 '/20190429035810fw_/' p2 '/n02101388.html'];
+k=k+1;url{k}=[p1 '/20190430215550fw_/' p2 '/n02108422.html'];
+k=k+1;url{k}=[p1 '/20190429035957fw_/' p2 '/n02096177.html'];
+k=k+1;url{k}=[p1 '/20190429041406fw_/' p2 '/n02113186.html'];
+k=k+1;url{k}=[p1 '/20190430212624fw_/' p2 '/n02099849.html'];
+
+%ignore/remove duplicate images
+files_to_be_ignored={...
+    'n02086646_172.jpg';'n02086646_280.jpg';'n02086646_422.jpg';'n02086910_103.jpg';
+    'n02088466_8078.jpg';'n02088632_4584.jpg';'n02088632_600.jpg';'n02088632_982.jpg';
+    'n02089867_3177.jpg';'n02090379_3300.jpg';'n02090379_855.jpg';'n02091831_6323.jpg';
+    'n02092002_4745.jpg';'n02092002_5557.jpg';'n02092002_6503.jpg';'n02093428_1378.jpg';
+    'n02093428_5635.jpg';'n02093428_8454.jpg';'n02093647_2687.jpg';'n02093647_3277.jpg';
+    'n02093647_518.jpg';'n02093859_324.jpg';'n02093991_4670.jpg';'n02094258_1408.jpg';
+    'n02094258_880.jpg';'n02095314_3227.jpg';'n02095314_80.jpg';'n02095570_3101.jpg';
+    'n02095570_5404.jpg';'n02095570_6443.jpg';'n02095889_1582.jpg';'n02095889_2471.jpg';
+    'n02095889_6458.jpg';'n02097130_5576.jpg';'n02097209_583.jpg';'n02097209_585.jpg';
+    'n02097474_7300.jpg';'n02097658_8018.jpg';'n02098105_2456.jpg';'n02098105_2945.jpg';
+    'n02098286_830.jpg';'n02099429_3513.jpg';'n02101556_5903.jpg';'n02102040_639.jpg';
+    'n02102177_2388.jpg';'n02102480_3436.jpg';'n02102973_1714.jpg';'n02102973_4469.jpg';
+    'n02104365_5670.jpg';'n02104365_7953.jpg';'n02105056_2194.jpg';'n02105056_785.jpg';
+    'n02105162_6449.jpg';'n02105251_7647.jpg';'n02106166_1031.jpg';'n02106166_346.jpg';
+    'n02106166_4107.jpg';'n02106166_6084.jpg';'n02106166_6512.jpg';'n02106166_6710.jpg';
+    'n02107908_3531.jpg';'n02107908_47.jpg';'n02108000_331.jpg';'n02109525_7982.jpg';
+    'n02110185_1614.jpg';'n02110185_4115.jpg';'n02112706_2070.jpg';'n02112706_2074.jpg';
+    'n02112706_2161.jpg';'n02112706_2191.jpg';'n02112706_420.jpg';'n02112706_539.jpg';
+    'n02112706_866.jpg';'n02113186_11400.jpg';'n02113712_1252.jpg';'n02113712_1546.jpg';
+    'n02113712_1558.jpg';'n02113799_254.jpg';'n02113978_2572.jpg';'n02113978_3474.jpg';
+    'n02113978_3832.jpg';'n02113978_530.jpg';'n02113978_737.jpg';'n02115913_2029.jpg';
+    'n02115913_3270.jpg';'n02115913_4032.jpg';'n02115913_564.jpg';'n02115913_739.jpg';
+    'n02115913_750.jpg'};
+
+n=0;then=now;disp_ETA_flag=false;
+parent_folder=fullfile(tempdir,'MATLAB','FileExchange','ComputeNonCryptHash','images');
+if ~exist(parent_folder,'dir'),mkdir(parent_folder);end
+for breed=1:numel(url)
+    if sum(~cellfun('isempty',IM))==N,continue,end
+    local_file=fullfile(parent_folder,sprintf('dog_breed_%02d.txt',breed));
+    if ~exist(local_file,'file')
+        str=readfile(url{breed});
+        fid=fopen(local_file,'w');fprintf(fid,'%s\n',str{:});fclose(fid);
+    end
+    str=readfile(local_file);
+    
+    ind=find(ismember(str,{'<div class="highslide-gallery">'}));
+    ind=ind+2;
+    while strcmp(str{ind}(1:4),'<a c') && sum(~cellfun('isempty',IM))<N
+        elem=str{ind};
+        elem=strrep(elem,'<a class="highslide" href="','/');
+        elem=strrep(elem,'" onclick="return hs.expand(this)">','');
+        ind=ind+2;
+        imurl=[p2 elem];
+        [discard,fn,ext]=fileparts(elem);fn=[fn,ext]; %#ok<AGROW,ASGLU>
+        if ismember(fn,files_to_be_ignored),continue,end
+        fn=fullfile(parent_folder,fn);
+        if ~exist(fn,'file')
+            WBM(fn,imurl,'flag','id','tries',[3 1 2]);
+            disp_ETA_flag=true;
+        end
+        n=n+1;
+        try IM{n}=imread(fn);catch,end
+        if disp_ETA_flag,ETA_disp(N,n,then);end
+    end
+end
+IM(cellfun('isempty',IM))=[];
+end
+
+% The functions below were minified to make them more compact.
+%
+% Included functions (internal dependencies not listed):
+%  - ETA_disp (version 1.0.1)
+%  - readfile (version 3.0.0)
+%  - WBM (version 2.0)
+
+function v001=ETA_disp(v002,v003,v004),persistent v005,if isempty(v005)
+v005.addtodate=f11('<',7,'Octave','<',4);end,v003=max(eps,v003);v006=(now-v004)*(24*60*60);v008=floor(v006/60);v007=round(v006-60*v008);
+v010=v003/v002;v009=min(10^10,round((v006-v010*v006)/v010));if v005.addtodate,v011=datestr(now+(v009/(24*60*60)),'HH:MM:SS');
+else,v011=datestr(addtodate(now,v009,'second'),'HH:MM:SS');end,v012=v006/v003;v014=floor(v012/60);v013=v012-60*v014;v001=cell(1,3);
+v001{1}=sprintf('%05.1f%% done after a total time of %02d:%02d.',100*v003/v002,v008,v007);v001{2}=sprintf('estimated time of completion: %s',v011);
+v001{3}=sprintf('(%02d:%05.2f per iteration, %d iterations left)',v014,v013,v002-v003);if nargout==0,clc,fprintf('%s\n',v001{:});clear v001;end,end
+function v015=readfile(v016,varargin),if nargin<1,error('HJW:readfile:nargin','Incorrect number of input argument.')
+end,if ~(nargout==0 || nargout==1),error('HJW:WBM:nargout','Incorrect number of output argument.')
+end,[v017,v018,v019]=f20(v016,varargin{:});if ~v017,rethrow(v019),else,[v005,v020,v021]=deal(v018.legacy,v018.UseURLread,v018.err_on_ANSI);
+v022=struct('con',v018.print_2_con,'fid',v018.print_2_fid,'obj',v018.print_2_obj);end,if isa(v016,'string'),v016=char(v016);end
+if numel(v016)>=8 && ( strcmp(v016(1:7),'http://') || strcmp(v016(1:8),'https://') ),if ~v005.allows_https && strcmp(v016(1:8),'https://')
+f30(v022,'HJW:readfile:httpsNotSupported',['This implementation of urlread probably doesn''t allow https requests.',char(10),'The next lines of code will probably result in an error.'])
+end,v023=f19(v016,v020,v022);if isa(v023,'cell'),v015=v023;
+else,v024=true;v023=f05(v023,v024);try [v025,v026,v027]=f28(v023);catch,v019=lasterror;if strcmp(v019.identifier,'HJW:UTF8_to_unicode:notUTF8')
+v026=false;else,f06(v022,v019),end,end,if v026,v023=f25(v027);end,v015=f02(v023);end,else,v015=f18(v016,v022,v021);end,end
+function v028=WBM(v016,v029,varargin),f35;if nargin<2,error('HJW:WBM:nargin','Incorrect number of input argument.'),end,if ~(nargout==0 || nargout==1)
+error('HJW:WBM:nargout','Incorrect number of output argument.'),end,[v017,v018,v019]=f33(v016,v029,varargin{:});if ~v017,rethrow(v019),else
+[v030,v031,v032,v033,v034,v035,v036,v037]=deal(v018.date_part,v018.tries,v018.response,v018.ignore,v018.verbose,v018.UseURLwrite,v018.flag,v018.err429);
+v038=v031(2)>0;v022=struct('con',v018.print_2_con,'fid',v018.print_2_fid,'obj',v018.print_2_obj);v018.print_2=v022;
+end,if ~f23(fileparts(v016)),f06(v022,'HJW:WBM:NoWriteFolder','The target folder doesn''t exist or Matlab doesn''t have write permission for it.')
+end,v039=cellfun('length',v032(:,2));[v039,v040]=sort(v039);v040=v040(end:-1:1);v032=v032(v040,:);
+v039=v039(end:-1:1);v041=1;v017=false;v042=[];v043=[];v044=0;while ~v017 &&sum(v031(1:2))>0 && v031(3)>=0,if v031(v041)<=0,v041=3-v041;
+end,v045=v041;try if v045==1,v046=false;v031(v045)=v031(v045)-1;if v035,v028=urlwrite( ['http://web.archive.org/web/' v030 v036 '_/' v029],v016);
+v028=f04(v016,v028);else,v028=websave(v016,['https://web.archive.org/web/' v030 v036 '_/' v029],weboptions('Timeout',10));
+end,elseif v045==2,v046=true;v031(v045)=v031(v045)-1;if v035,v028=urlwrite( ['http://web.archive.org/save/' v029],v016);
+v028=f04(v016,v028);else,v028=websave(v016,['https://web.archive.org/save/' v029],weboptions('Timeout',10));end,end,v017=true;v044=0;
+if v038 && ~f03(v028,v018,v046),v017=false;v041=2;end,catch,v019=lasterror;v017=false;if ~f12,while ~f12,v047=datestr(now,'HH:MM:SS');
+if v034>=1,f30(v022,'Internet connection down, retrying in %d seconds (@%s)',2^v044,v047),end,pause(2^v044),v044=min(1+v044,6);
+end,continue,end,v044=0;v048=v019.identifier;v048=strrep(v048,':urlwrite:',':webservices:');if strcmp(v048,'MATLAB:webservices:Timeout')
+v049=4080;v031(3)=v031(3)-1;else,v050=strrep(v048,'MATLAB:webservices:HTTP','');v050=strrep(v050,'StatusCodeError','');v050=str2double(v050);
+if isnan(v050),v049=-1;if v034>=2,f30(v022,v019.identifier,v019.message),end,else,switch v019.message,case 'urlwrite: Couldn''t resolve host name'
+v049=404;case ['urlwrite: Peer certificate cannot be ','authenticated with given CA certificates'],v049=403;
+otherwise,v049=v050;end,end,end,if v034>=3,v051=sprintf('Error %d tries(%d,%d,%d) (download of %s)',double(v049),v031(1),v031(2),v031(3),v016);
+if v022.fid.boolean,fprintf(v022.fid.fid,'%s\n',v051);
+end,if v022.obj.boolean,set(v022.obj.obj,'String',v051),end,drawnow,end,if ~any(v049==v033),v042(end+1)=v049;v043(end+1)=v045;
+for v052=1:size(v032,1),if length(v042) < v039(v052),continue,end,v053=v042( (end-v039(v052)+1):end);v054=v043( (end-v039(v052)+1):end);
+v055=v032{v052,1}(2:2:end);v055=strrep(v055,'x',num2str(v045));v056=strcmp(v055,sprintf('%d',v054));if isequal( v032{v052,2},v053) && v056
+switch v032{v052,3},case 'load',v041=1;case 'save',v041=2;case 'exit',v031=[0 0 -1];case 'pause_retry',if ~v037.CountsAsTry
+v031(v041)=v031(v041)+1;end,if v034>=v037.PrintAtVerbosityLevel,v057=10;v058='Waiting a while until the server won''t block us anymore';
+if v022.fid.boolean,fprintf(v022.fid.fid,v058);drawnow,end,for v003=1:v057,pause(v037.TimeToWait/v057),if v022.fid.boolean
+fprintf(v022.fid.fid,'.');drawnow,end,if v022.obj.boolean,v058=[v058 '.'];set(v022.obj.obj,v058);drawnow,end,end,if v022.fid.boolean
+fprintf(v022.fid.fid,'\nContinuing\n');drawnow,end,if v022.obj.boolean,set(v022.obj.obj,'Continuing');drawnow,end,else,pause(v037.TimeToWait),end
+end,break,end,end,end,end,end,if ~v017 || ( ~v038 && ~f03(v028,v018,v046) ),if exist(v016,'file'),delete(v016);end,v059=[v016 '.html'];v079=dir(v059);
+if numel(v079)==1 && v079.bytes==0 && abs(datenum(v079.date)-now)<=(1/24),delete(v059);end,v028=[];end,v059=[v016 '.html'];v079=dir(v059);
+if numel(v079)==1 && v079.bytes==0 && abs(datenum(v079.date)-now)<=(1/24),try delete(v059);catch,end,end,if nargout==0,clear('outfilename');end,end
+function v001=f01(v060,v061),try v001=v060+v061;catch,try v001=bsxfun(@plus,v060,v061);
+catch,v063=size(v060); v062=size(v061);v060=repmat(v060,max(1,v062./v063)); v061=repmat(v061,max(1,v063./v062));v001=v060+v061;end,end,end
+function v064=f02(v023),v065=[0 find(v023==10) numel(v023)+1];
+v064=cell(numel(v065)-1,1);for v003=1:numel(v064),v066=(v065(v003 )+1);v067=(v065(v003+1)-1);v064{v003}=v023(v066:v067);end,end
+function v068=f03(v028,v018,v046),if ~exist(v028,'file'),v068=false;return
+end,[v069,v070,v022]=deal(v018.m_date_r,v018.date_bounds,v018.print_2);if ~v046,v071=f31;end,v072='<input type="hidden" name="date" value="';
+v015=readfile(v028);v073=0;while v073<=numel(v015) && (v073==0 || ~strcmp(f21(v015{v073}),'<td class="u" colspan="2">'))
+v073=v073+1;end,if numel(v015)>=(v073+1),v074=v015{v073+1};
+v075=strfind(v074,v072);v075=v075+length(v072)-1;v076=str2double(v074(v075+(1:14)));v068= v070.double(1)<=v076 && v076<=v070.double(2);
+return,end,v015=v015(:)';v015=cell2mat(v015);v075=strfind(v015,'/web/');if numel(v075)==0,if v069==0,v068=true;
+return,elseif v069==1,f30(v022,'HJW:WBM:MissingDateWarning','No date found in file, unable to check date, assuming it is correct.'),v068=true;return
+elseif v069==2,f06(v022,'HJW:WBM:MissingDateError',['Could not find date. This can mean there is an ','error in the save. Try saving manually.'])
+end,end,v077=zeros(size(v075));v015=[v015 'abcdefghijklmnopqrstuvwxyz'];if exist('isstrprop','builtin')
+for v003=1:length(v075),for v078=1:14,if ~isstrprop(v015(v075(v003)+4+v078),'digit'),break,end,end,v077(v003)=str2double(v015(v075(v003)+4+(1:v078)));
+end,else,for v003=1:length(v075),for v078=1:14,if ~any(double(v015(v075(v003)+4+v078))==(48:57)),break
+end,end,v077(v003)=str2double(v015(v075(v003)+4+(1:v078)));end,end,[v079,v080,v064]=unique(v077);try [v080,v081]=max(histc(v064,1:max(v064)));catch
+[v080,v081]=max(accumarray(v064,1));end,v076=v079(v081);v068= v070.double(1)<=v076 && v076<=v070.double(2);if ~v046,if v076<1e4,if v069==0,v068=true;
+return,elseif v069==1,f30(v022,'HJW:WBM:MissingDateWarning','No date found in file, unable to check date, assuming it is correct.'),v068=true;return
+elseif v069==2,f06(v022,'HJW:WBM:MissingDateError',['Could not find date. This can mean there is an ','error in the save. Try saving manually.'])
+end,end,v074=sprintf('%014d',v076);v074={v074(1:4),v074(5:6),v074(7:8),v074(9:10),v074(11:12),v074(13:14)};
+v074=str2double(v074);timediff=(v071-datenum(v074))*24*60*60;if timediff<10,v068=false;elseif timediff<60
+warning('HJW:WBM:LivePageStored',['The live page might have been saved instead of a capture.',char(10),'Check on the WBM if a capture exists.'])
+end,end,end
+function v028=f04(v016,v028),v083=[pwd filesep v016];if ~strcmp(v028,v083),if ~exist(v028,'file') &&exist(v083,'file'),v028=v083;end,end,end
+function v023=f05(v023,v084)
+persistent v085 v086,if isempty(v085),v087=[338 140;339 156;352 138;353 154;376 159;381 142;382 158;402 131;710 136;732 152;
+8211 150;8212 151;8216 145;8217 146;8218 130;8220 147;8221 148;8222 132;8224 134;8225 135;
+8226 149;8230 133;8240 137;8249 139;8250 155;8364 128;8482 153];v085=v087(:,2);v086=v087(:,1);end,if nargin>1 && v084
+v089=v086;v088=v085;else,v089=v085;v088=v086;end,v023=uint32(v023);for v078=1:numel(v089),v023=f17(v023,v089(v078),v088(v078));end,end
+function f06(v090,varargin)
+if isempty(v090),v090=struct;end,if ~isfield(v090,'fid'),v090.fid.boolean=false;end,if ~isfield(v090,'obj'),v090.obj.boolean=false;end,if nargin==2
+if isa(varargin{1},'struct') || isa(varargin{1},'MException'),v019=varargin{1};try v091=v019.stack;v092=f07(0,v091);catch,[v092,v091]=f07(2);
+end,v093=v019.identifier;v094=v019.message;v095='Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback(';
+if isa(v019,'struct') && numel(v094)>numel(v095) && strcmp(v095,v094(1:numel(v095)))
+v094(1:find(v094==10,1))='';end,else,[v092,v091]=f07(2);[v093,v094]=deal('',varargin{1});end,else,[v092,v091]=f07(2);
+if ~isempty(strfind(varargin{1},'%')),v093='';v096=varargin(2:end);v094=sprintf(varargin{1},v096{:});else,v093=varargin{1};v094=varargin{2};
+if nargin>3,v096=varargin(3:end);v094=sprintf(v094,v096{:});end,end,end,v019=struct('identifier',v093,'message',v094,'stack',v091);if v090.obj.boolean
+v097=v094;while v097(end)==10,v097(end)='';end,if any(v097==10),v097=regexp_outkeys(['Error: ' v097],char(10),'split');else,v097=['Error: ' v097];
+end,set(v090.obj.obj,'String',v097),end,if v090.fid.boolean,fprintf(v090.fid.fid,'Error: %s\n%s',v094,v092);end,rethrow(v019),end
+function [v023,v091]=f07(v098,v091),if nargin==0,v098=1;end
+if nargin<2, v091=dbstack;end,v091(1:v098)=[];if ~isfield(v091,'file'),for v003=1:numel(v091),v099=v091(v003).name;if strcmp(v099(end),')')
+v100=strfind(v099,'(');v101=v099( (v100(end)+1):(end-1) );v102=v099(1:(v100(end)-2));else,v102=v099;[v033,v101]=fileparts(v099);
+end,[v033,v091(v003).file]=fileparts(v102);v091(v003).name=v101;end,end,persistent v103,if isempty(v103),v103=exist('OCTAVE_VERSION', 'builtin');end
+if v103,for v003=1:numel(v091),[v033,v091(v003).file]=fileparts(v091(v003).file);end,end,v058=v091;v104='>';
+v023=cell(1,numel(v058)-1);for v003=1:numel(v058),[v105,v058(v003).file,v106]=fileparts(v058(v003).file);if v003==numel(v058),v058(v003).file='';end
+if strcmp(v058(v003).file,v058(v003).name),v058(v003).file='';end,if ~isempty(v058(v003).file),v058(v003).file=[v058(v003).file '>'];end
+v023{v003}=sprintf('%c In %s%s (line %d)\n',v104,v058(v003).file,v058(v003).name,v058(v003).line);v104=' ';end,v023=horzcat(v023{:});end
+function v107=f08(v108),if nargin==0,v109=f09;if isempty(v109),v109=f10;if isempty(v109)
+error('HJW:getUTC:TimeReadFailed',['Both methods of retrieving the UTC timestamp failed.\nEnsure you ','have write access to the current folder and check your internet connection.'])
+end,end,else,if v108==1,v109=f09;else,v109=f10;end,end,v110=v109/(24*60*60);v107=v110+datenum(1970,1,1);end
+function v109=f09,persistent v111 v112 v113 v114 v115,if isempty(v111)
+v113=['utc_time_' f16];v113=strrep(v113,['.' mexext],'');try v114=str2func(v113);catch,end,v112=fullfile(tempdir,'MATLAB','FileExchange','getUTC');try
+if isempty(strfind([path ';'],[v112 ';'])),if ~exist(v112,'dir'),mkdir(v112);end,addpath(v112,'-end');end,catch,end,v115=5;v111={'#include "mex.h"';
+'#include "time.h"';'';'/* Abraham Cohn,  3/17/2005 */';'/* Philips Medical Systems */';'';'void mexFunction(int nlhs, mxArray *plhs[], int nrhs,';
+'                 const mxArray *prhs[])';'{';'  time_t utc;';'  ';'  if (nlhs > 1) {';'    mexErrMsgTxt("Too many output arguments");';'  }';'  ';
+'  /* Here is a nice ref: www.cplusplus.com/ref/ctime/time.html */';'  time(&utc);';'  /* mexPrintf("UTC time in local zone: %s",ctime(&utc)); */';
+'  /* mexPrintf("UTC time in GMT: %s",asctime(gmtime(&utc))); */';'  ';'  /* Create matrix for the return argument. */';
+'  plhs[0] = mxCreateDoubleScalar((double)utc);';'   ';'}'};end,try v109=feval(v114);catch,if exist(['utc_time.' f16],'file')
+v019=lasterror;rethrow(v019);end,v115=v115-1;if v115<0,v109=[];return,end,if f23(v112),v010=v112;else,v010=pwd;end,v116=cd(v010);
+try if ~exist(fullfile(v010,[v113 '.c']),'file'),v117=fopen(fullfile(v010,[v113 '.c']),'w');for v074=1:numel(v111),fprintf(v117,'%s\n',v111{v074});
+end,fclose(v117);end,try mex([v113 '.c']);catch,end,for v118={'c','o'},v102=fullfile(v010,[v113 '.' v118{1}]);if exist(v102,'file'),delete(v102),end
+end,catch,end,cd(v116);if exist([v113 '.' mexext],'file'),v114=str2func(v113);v109=feval(v114);else,v109=[];end,end,end
+function v109=f10,if ~f12,v109=[];return,end,for v031=1:3,try if exist('webread','file'),v015=webread('http://www.utctime.net/utc-timestamp');
+else,v015=urlread('http://www.utctime.net/utc-timestamp');end,break,catch,end,end,try v015(v015==' ')='';v095='vartimestamp=';
+v119=strfind(v015,v095)+numel(v095);v120=strfind(v015,';')-1;v120(v120<v119)=[];v109=str2double(v015(v119:v120(1)));catch,v109=[];end,end
+function v121=f11(v122,v123,v124,v125,v126),persistent v127 v128 v129,if isempty(v127),v129=exist('OCTAVE_VERSION', 'builtin');v127=version;
+v025=strfind(v127,'.');if numel(v025)~=1,v127(v025(2):end)='';v025=v025(1);end,v127=[str2double(v127(1:(v025-1))) str2double(v127((v025+1):end))];
+v127=v127(1)+v127(2)/100;v127=round(100*v127);v128={ 'R13' 605;'R13SP1' 605;'R13SP2' 605;'R14' 700;'R14SP1' 700;'R14SP2' 700;'R14SP3' 701;
+'R2006a' 702;'R2006b' 703;'R2007a' 704;'R2007b' 705;'R2008a' 706;'R2008b' 707;
+'R2009a' 708;'R2009b' 709;'R2010a' 710;'R2010b' 711;'R2011a' 712;'R2011b' 713;
+'R2012a' 714;'R2012b' 800;'R2013a' 801;'R2013b' 802;'R2014a' 803;'R2014b' 804;
+'R2015a' 805;'R2015b' 806;'R2016a' 900;'R2016b' 901;'R2017a' 902;'R2017b' 903;
+'R2018a' 904;'R2018b' 905;'R2019a' 906;'R2019b' 907;'R2020a' 908;'R2020b',909};end,if v129,if nargin==2
+warning('HJW:ifversion:NoOctaveTest',['No version test for Octave was provided.',char(10),'This function might return an unexpected outcome.'])
+v130=ismember(v128(:,1),v123);
+if sum(v130)~=1,warning('HJW:ifversion:NotInDict','The requested version is not in the hard-coded list.'),v121=NaN;return,else
+v131=v128{v130,2};end,elseif nargin==4,[v122,v131]=deal(v124,v125);v131=0.1*v131+0.9*fix(v131);v131=round(100*v131);else,[v122,v131]=deal(v125,v126);
+v131=0.1*v131+0.9*fix(v131);v131=round(100*v131);end,else,if isnumeric(v123),v131=0.1*v123+0.9*fix(v123);v131=round(100*v131);
+else,v130=ismember(v128(:,1),v123);if sum(v130)~=1,warning('HJW:ifversion:NotInDict','The requested version is not in the hard-coded list.')
+v121=NaN;return,else,v131=v128{v130,2};end,end,end,switch v122,case '==', v121= v127 == v131;
+case '<' , v121= v127 < v131;case '<=', v121= v127 <= v131;case '>' , v121= v127 > v131;case '>=', v121= v127 >= v131;end,end
+function [v132,v133]=f12,v121=f15;if isempty(v121),v132=0;v133=0;else,if v121,[v132,v133]=f13;else,[v132,v133]=f14;end,end,end
+function [v132,v133]=f13,try v004=now;if exist('webread','file')
+v023=webread('http://google.com');else,v023=urlread('http://google.com');end,v132=1;v133=(now-v004)*24*3600*1000;catch,v132=0;v133=0;end,end
+function [v132,v133]=f14,if ispc,try [v080,v134]=system('ping -n 1 8.8.8.8');
+v135=v134(strfind(v134,' = ')+3);v135=v135(1:3);if ~strcmp(v135,'110'),error('trigger error'),else,v132=1;[v119,v120]=regexp(v134,' [0-9]+ms');
+v133=v134((v119(1)+1):(v120(1)-2));v133=str2double(v133);end,catch,v132=0;v133=0;end,elseif isunix,try [v080,v134]=system('ping -c 1 8.8.8.8');
+v100=regexp(v134,', [01] ');if v134(v100+2)~='1',error('trigger error'),else,v132=1;[v119,v120]=regexp(v134,'=[0-9.]+ ms');
+v133=v134((v119(1)+1):(v120(1)-2));v133=str2double(v133);end,catch,v132=0;v133=0;end,else,error('How did you even get Matlab to work?'),end,end
+function [v121,v132,v133]=f15,persistent v136,if ~isempty(v136)
+v121=v136;return,end,[v132,v133]=f14;if v132,v136=false;v121=false;return,end,[v132,v133]=f13;if v132,v136=true;v121=true;return,end,v121=[];end
+function v118=f16
+v131=version;v100=strfind(v131,'.');v131(v100(2):end)='';v131=['v' strrep(v131,'.','_')];if ~exist('OCTAVE_VERSION', 'builtin'),v045=computer;
+else,v137=computer;v137=v137(1:(strfind(v137,'-')-1));if ispc,if strcmp(v137,'x86_64') ,v045= 'win_64';elseif strcmp(v137,'i686'),v045= 'win_i686';
+elseif strcmp(v137,'x86') ,v045= 'win_x86';else ,v045=['win_' v137];end,elseif isunix && ~ismac,if strcmp(v137,'i686') ,v045= 'lnx_i686';
+elseif strcmp(v137,'x86_64'),v045= 'lnx_64';else ,v045=['lnx_' v137];end,elseif ismac,if strcmp(v137,'x86_64'),v045= 'mac_64';
+else ,v045=['mac_' v137];end,end,end,v045=strrep(strrep(v045,'.',''),'-','');v118=[v131 '_' v045 '.' mexext];end
+function v001=f17(v138,v139,v140)
+v001=v138(:)';if numel(v139)==0,v130=false(size(v138));elseif numel(v140)>numel(v139),error('not implemented (padding required)')
+else,v130=true(size(v138));for v003=1:numel(v139),v141=find(v138==v139(v003));v141=v141-v003+1;v141(v141<1)=[];v142=false(size(v130));v142(v141)=true;
+v130= v130 & v142;if ~any(v130),break,end,end,end,v141=find(v130);if ~isempty(v141),for v003=1:numel(v140),v001(v141+v003-1)=v140(v003);
+end,if numel(v140)==0,v003=0;end,if numel(v139)>v003,v141=v141(:);v143=(v003+1):numel(v139);v075=f01(v141,v143-1);v001(v075(:))=[];end,end,end
+function v023=f18(v016,v022,v021)
+if nargin==1,v022=struct;v021=false;end,persistent v144,if isempty(v144),v144 = exist('OCTAVE_VERSION', 'builtin') ~= 0;end
+persistent v145,if isempty(v145),if v144,v146='Octave';else,v146='Matlab';end
+v145=struct('identifier','HJW:readfile:ReadFail','message',sprintf('%s could not read the file %s.\nThe file doesn''t exist or is not readable.',v146,v016));
+end,v117=fopen(v016,'rb');if v117<0,f06(v022,v145),end,v015=fread(v117,'uint8');
+fclose(v117);v015=v015.';try v026=true;v027=f28(v015);catch,v019=lasterror;if strcmp(v019.identifier,'HJW:UTF8_to_unicode:notUTF8'),v026=false;
+if v021,f06(v022,'HJW:readfile:notUTF8','The provided file "%s" is not a correctly encoded UTF-8 file.',v016),end,else,f06(v022,v019),end,end
+if v144,if v026,v023=v027;else,try v023=fileread(v016);catch,f06(v022,v145),end,v023=f05(v023);end,else,if ispc,if v026,v023=v027;else,if f11('<',7)
+try v023=fileread(v016);catch,f06(v022,v145),end,v023=f05(v023);else,try v023=fileread(v016);catch,f06(v022,v145),end,end,end,else,if v026,v023=v027;
+else,v023=f05(v015);end,end,end,v023(v023==13)=[];if numel(v023)>=1 && double(v023(1))==65279,v023(1)=[];end,v023=f25(v023);v023=f02(v023);end
+function v023=f19(v147,v020,v148)
+try v149=false;v150=f24('readfile_from_URL_tmp_','.txt');try if v020,v150=urlwrite(v147,v150);else,v150=websave(v150,v147);end
+v023=f18(v150);catch,v149=true;end,try if exist(v150,'file'),delete(v150);end,catch,end
+if v149,error('revert to urlread'),end,catch,try if v020,v023=urlread(v147);else,v023=webread(v147);end,catch,f06(v148,lasterror),end,end,end
+function [v017,v090,v019]=f20(v016,varargin),v017=false;v090=struct;v019=struct('identifier','','message','');
+if ~( isa(v016,'char') || isa(v016,'string') ) ||( isa(v016,'string') && numel(v016)~=1 ) ||( isa(v016,'char') && numel(v016)==0 )
+v019.identifier='HJW:readfile:IncorrectInput';v019.message='The file name must be a non-empty char or a scalar string.';
+return,end,persistent v151,if isempty(v151),v005.split = f11('<','R2007b','Octave','<',4);
+v005.allows_https=f11('>',0,'Octave','<',0);v151.legacy=v005;v151.UseURLread=isempty(which('webread')) || isempty(which('websave'));
+v151.print_2_con=true;v151.print_2_fid.boolean=false;v151.print_2_obj.boolean=false;v151.err_on_ANSI=false;end,if nargin==1
+v090=v151;v017=true;return,end,v152=nargin==2 && isa(varargin{1},'struct');v153=mod(nargin,2)==1 &&all(cellfun('isclass',varargin(1:2:end),'char'));
+if ~( v152 || v153 ),v019.message=['The second input (options) is expected to be either a struct, ','or consist of Name,Value pairs.'];
+v019.identifier='HJW:readfile:incorrect_input_options';
+return,end,if v153,for v003=1:2:numel(varargin),try v090.(varargin{v003})=varargin{v003+1};catch,v019.message='Parsing of Name,Value pairs failed.';
+v019.identifier='HJW:readfile:incorrect_input_NameValue';return,end,end,else,v090=varargin{1};end,v150=fieldnames(v090);for v141=1:numel(v150)
+v154=v150{v141};v155=v090.(v154);v019.identifier=['HJW:readfile:incorrect_input_opt_' lower(v154)];switch v154,case 'UseURLread'
+[v156,v155]=f22(v155);if ~v156,v019.message='UseURLread should be either true or false';return,end,v090.UseURLread=v155 || v151.UseURLread;
+case 'err_on_ANSI',[v156,v155]=f22(v155);if ~v156,v019.message='err_on_ANSI should be either true or false';return,end,v090.show_UTF_err=v155;
+case 'print_to_fid',if isempty(v155),v090.print_2_fid.boolean=false;else,v090.print_2_fid.boolean=true;try v157=ftell(v155);catch,v157=-1;end
+if v155~=1 && v157==-1,v019.message=['Invalid print_to_fid parameter: ','should be a valid file identifier or 1'];
+return,end,v090.print_2_fid.fid=v155;end,case 'print_to_obj',if isempty(v155)
+v090.print_2_obj.boolean=false;else,v090.print_2_obj.boolean=true;try v051=get(v155,'String');set(v155,'String','');set(v155,'String',v051);
+v090.print_2_obj.obj=v155;catch,v019.message=['Invalid print_to_obj parameter: ','should be a handle to an object with a writeable String property'];
+return,end,end,case 'print_to_con',[v156,v090.print_2_con]=f22(v155);if ~v156,v019.message='print_to_con should be either true or false';
+return,end,end,end,if ~isfield(v090,'print_2_con') &&( isfield(v090,'print_2_fid') || isfield(v090,'print_2_obj') ),v090.print_2_con=false;
+end,v150=fieldnames(v151);for v141=1:numel(v150),if ~isfield(v090,v150(v141)),v090.(v150{v141})=v151.(v150{v141});end,end,v017=true;v019=[];end
+function v023=f21(v023),if exist('strtrim','builtin'),v023=strtrim(v023);else,if numel(v023)==0,return,end,v130=isspace(v023);if v130(end)
+v075=find(~v130);if isempty(v075),v023='';return,end,v023((v075(end)+1):end)='';end,if isempty(v023),return,end,if v130(1),v075=find(~v130);
+v023(1:(v075(1)-1))='';end,end,v158=inf;while v158~=0,v159=length(v023);v023=strrep(v023,'  ',' ');v160=length(v023);v158=v159-v160;end,end
+function [v161,v162]=f22(v162),persistent v163,if isempty(v163),v163={true,false;1,0;'on','off'};
+try v163(end+1,:)=eval('{"on","off"}');catch,end,end,v161=true;try for v003=1:size(v163,1),for v078=1:2,if isequal(v162,v163{v003,v078})
+v162=v163{1,v078};return,end,end,end,if isa(v162,'matlab.lang.OnOffSwitchState'),v162=logical(v162);return,end,catch,end,v161=false;end
+function v121=f23(v010),if ~( isempty(v010) || exist(v010,'dir') ),v121=false;return
+end,v150='';while isempty(v150) || exist(v150,'file'),[v033,v150]=fileparts(f24('write_permission_test_','.txt'));v150=fullfile(v010,v150);
+end,try v117=fopen(v150,'w');fprintf(v117,'test');fclose(v117);delete(v150);v121=true;catch,try delete(v150);catch,end,v121=false;end,end
+function v023=f24(v164,v118)
+if nargin<1,v164='';end,if ~isempty(v164),v164=[v164 '_'];end,if nargin<2,v118='';else,if ~strcmp(v118(1),'.'),v118=['.' v118];end,end
+v023=tempname;[v165,v010]=fileparts(v023);v023=fullfile(v165,[v164 v010 v118]);end
+function v023=f25(v166,v167),persistent v144,if isempty(v144),v144 = exist('OCTAVE_VERSION', 'builtin') ~= 0;end,if nargin==1,v167=~v144;
+end,if v167,if all(v166<65536),v023=uint16(v166);v023=reshape(v023,1,numel(v023));else,[v168,v033,v169]=unique(v166);v023=cell(1,numel(v166));
+for v003=1:numel(v168),v170=f26(v168(v003));v170=uint16(v170);v023(v169==v003)={v170};end,v023=cell2mat(v023);end,if ~v144,v023=char(v023);
+end,else,if all(v166<128),v023=char(v166);v023=reshape(v023,1,numel(v023));else,[v168,v033,v169]=unique(v166);v023=cell(1,numel(v166));
+for v003=1:numel(v168),v170=f27(v168(v003));v170=uint8(v170);v023(v169==v003)={v170};end,v023=cell2mat(v023);v023=char(v023);end,end,end
+function v023=f26(v166)
+if v166<65536,v023=v166;return,end,v171=double(v166)-65536;v171=dec2bin(v171,20);v023=bin2dec(['110110' v171(1:10);'110111' v171(11:20)]).';end
+function v023=f27(v166)
+if v166<128,v023=v166;return,end,persistent v172,if isempty(v172),v172=struct;v172.limits.lower=hex2dec({'0000','0080','0800', '10000'});
+v172.limits.upper=hex2dec({'007F','07FF','FFFF','10FFFF'});v172.scheme{2}='110xxxxx10xxxxxx';v172.scheme{2}=reshape(v172.scheme{2}.',8,2);
+v172.scheme{3}='1110xxxx10xxxxxx10xxxxxx';v172.scheme{3}=reshape(v172.scheme{3}.',8,3);v172.scheme{4}='11110xxx10xxxxxx10xxxxxx10xxxxxx';
+v172.scheme{4}=reshape(v172.scheme{4}.',8,4);for v134=2:4,v172.scheme_pos{v134}=find(v172.scheme{v134}=='x');
+v172.bits(v134)=numel(v172.scheme_pos{v134});end,end,v173=find(v172.limits.lower<v166 & v166<v172.limits.upper);
+v023=v172.scheme{v173};v174=v172.scheme_pos{v173};v134=dec2bin(v166,v172.bits(v173));v023(v174)=v134;v023=bin2dec(v023.').';end
+function [v166,v026,v175]=f28(v176,v148),if nargin<2,v148=[];end,v177= nargout==1 ;v176=uint32(v176);[v175,v036,v019]=f29(v176,v177);
+if strcmp(v036,'success'),v026=true;v166=v175;elseif strcmp(v036,'error'),v026=false;if v177,f06(v148,v019),end,v166=v176;end,end
+function [v176,v036,v019]=f29(v176,v177),v036='success';v019=struct('identifier','HJW:UTF8_to_unicode:notUTF8','message','Input is not UTF-8.');
+persistent v144,if isempty(v144),v144 = exist('OCTAVE_VERSION', 'builtin') ~= 0;end,if any(v176>255),v036='error';
+if v177,return,end,elseif all(v176<128),return,end,for v173=4:-1:2,v162=bin2dec([repmat('1',1,v173) repmat('0',1,8-v173)]);v178=v176>=v162 & v176<256;
+if any(v178),v178=find(v178);v178=v178(:).';if numel(v176)<(max(v178)+v173-1),v036='error';if v177,return,end,v178( (v178+v173-1)>numel(v176) )=[];end
+if ~isempty(v178),v075=f01(v178 , (0:(v173-1)).' );v075=v075.';v178=v176(v075);end,else,v178=[];end,v179=[repmat('1',1,v173-1) repmat('10',1,v173)];
+v180=unique([1:(v173+1) 1:8:(8*v173) 2:8:(8*v173)]);if numel(v178)>0,v178=unique(v178,'rows');v181=mat2cell(v178,ones(size(v178,1),1),v173);
+for v003=1:numel(v181),v182=dec2bin(double(v181{v003}))';if ~strcmp(v179,v182(v180)),v036='error';if v177,return,end
+continue,end,v182(v180)='';if ~v144,v183=uint32(bin2dec(v182 ));else,v183=uint32(bin2dec(v182.'));end,v176=f17(v176,v181{v003},v183);end,end,end,end
+function f30(v090,varargin),if isempty(v090),v090=struct;end
+if ~isfield(v090,'con'),v090.con=false;end,if ~isfield(v090,'fid'),v090.fid.boolean=false;end,if ~isfield(v090,'obj'),v090.obj.boolean=false;end
+if nargin==2 || ~isempty(strfind(varargin{1},'%')),[v093,v094]=deal('',varargin{1});if nargin>3,v096=varargin(2:end);v094=sprintf(v094,v096{:});
+end,else,[v093,v094]=deal(varargin{1},varargin{2});if nargin>3,v096=varargin(3:end);v094=sprintf(v094,v096{:});end,end,if v090.con,if ~isempty(v093)
+warning(v093,'%s',v094),else,warning(v094),end,else,if ~isempty(v093),lastwarn(v094,v093);else,lastwarn(v094),end,end,if v090.obj.boolean
+v097=v094;while v097(end)==10,v097(end)=[];end,if any(v097==10),v097=regexp_outkeys(['Warning: ' v097],char(10),'split');else,v097=['Warning: ' v097];
+end,set(v090.obj.obj,'String',v097),end,if v090.fid.boolean,v098=2;v092=f07(v098);fprintf(v090.fid.fid,'Warning: %s\n%s',v094,v092);end,end
+function v107=f31,v107=f08(2);if isempty(v107),v107=f08(1);if isempty(v107),v107=0;end,end,end
+function [v184,v185]=f32(v030)
+shift=[ 1000, 0, 0, 0, 0, 0;100 , 0, 0, 0, 0, 0;10 , 0, 0, 0, 0, 0;1 , 0, 0, 0, 0, 0;0 ,10, 0, 0, 0, 0;0 , 1, 0, 0, 0, 0;0 , 0,10, 0, 0, 0;0 , 0, 1, 0, 0, 0;0 , 0, 0,10, 0, 0;0 , 0, 0, 1, 0, 0;0 , 0, 0, 0,10, 0;0 , 0, 0, 0, 1, 0;0 , 0, 0, 0, 0,10;0 , 0, 0, 0, 0, 1];
+v187=char(zeros(1,14)+'0');
+v187(1:numel(v030))=v030;v187={v187(1:4),v187(5:6),v187(7:8),v187(9:10),v187(11:12),v187(13:14)};v187=str2double(v187);v187(1:3)=max(v187(1:3),1);
+v188=num2cell(v187);v188=datenum(v188{:});v122=datestr(v188,'yyyymmddTHHMMSS');v122(9)='';if ~strcmp(v122(1:numel(v030)),v030)
+error('incorrect date_part format'),end,v189=v187+shift(numel(v030),:);v190=[31 28 31 30 31 30 31 31 30 31 30 31];
+v191=v189(1);if rem(v191,4)==0 && (rem(v191,100)~=0 || rem(v191,400)==0),v190(2) = 29;end,v190=v190(min(12,v189(2)));
+v192=find(v189>[inf 12 v190 23 59 59])+1;if ~isempty(v192),v189(v192:end)=inf;else,v189(end)=-1;end,v189=min(v189,[inf 12 v190 23 59 59]);
+v189=num2cell(v189);v189=datenum(v189{:});v185=(v188+v189)/2;v185=datestr(v185,'yyyymmddTHHMMSS');v185(9)='';v184=[v188 v189];end
+function [v017,v090,v019]=f33(v016,v147,varargin),v017=false;v090=struct;
+v019=struct('identifier','','message','');if ~ischar(v016) || numel(v016)==0,v019.message='The first input (filename) is not char and/or empty.';
+v019.identifier='HJW:WBM:incorrect_input_filename';return,end,if ~ischar(v147) || numel(v147)==0
+v019.message='The second input (url) is not char and/or empty.';v019.identifier='HJW:WBM:incorrect_input_url';return
+end,persistent v151 v193,v194=false;if isempty(v151),v151.date_part='2';v151.tries=[5 4 4];v151.response={ 'tx',404,'load';'txtx',[404 404],'save';
+'tx',403,'save';'t2t2',[403 403],'exit';'tx',429,'pause_retry' };v151.ignore=4080;v151.verbose=3;v151.m_date_r=1;v151.flag='*';
+v151.UseLocalTime=false;v151.UseURLwrite=isempty(which('websave'));v151.err429=struct('CountsAsTry',false,'TimeToWait',15,'PrintAtVerbosityLevel',3);
+v151.print_2_con=true;v151.print_2_fid.boolean=false;v151.print_2_obj.boolean=false;[v184,v185]=f32(v151.date_part);
+v151.date_part=v185;v151.date_bounds.datenum=v184;v155={datestr(v184(1),'yyyymmddTHHMMSS'),datestr(v184(2),'yyyymmddTHHMMSS')};
+v155{1}(9)='';v155{2}(9)='';v151.date_bounds.double=[str2double(v155{1}) str2double(v155{2})];v193=f35;end,if nargin==2
+v090=v151;v017=true;return,end,v152=nargin==3 && isa(varargin{1},'struct');v153=mod(nargin,2)==0 &&all(cellfun('isclass',varargin(1:2:end),'char'));
+if ~( v152 || v153 ),v019.message=['The third input (options) is expected to be either a struct, ','or consist of Name,Value pairs.'];
+v019.identifier='HJW:WBM:incorrect_input_options';return,end,if v153,for v003=1:2:numel(varargin),try v090.(varargin{v003})=varargin{v003+1};
+catch,v019.message='Parsing of Name,Value pairs failed.';v019.identifier='HJW:WBM:incorrect_input_NameValue';return,end,end,else,v090=varargin{1};
+end,v150=fieldnames(v090);for v141=1:numel(v150),v154=v150{v141};v155=v090.(v154);v019.identifier=['HJW:WBM:incorrect_input_opt_' lower(v154)];
+switch v154,case 'date_part',v195=true;if ~ischar(v155) || numel(v155)==0 || numel(v155)>14 || any(v155<48 & v155>57),v195=false;
+end,try [v184,v185]=f32(v155);catch,v195=false;end,if ~v195,v019.message='The value of options.date_part is empty or not a valid numeric char.';
+return,end,v090.date_part=v185;v090.date_bounds.datenum=v184;case 'tries',if ~isnumeric(v155) || numel(v155)~=3 || any(isnan(v155))
+v019.message=['The value of options.tries has an incorrect format.',char(10),'The value should be a numeric vector with 3 integer elements.'];
+return,end,case 'response',if f34(v155),v019.message='The value of options.response has an incorrect format.';
+return,end,case 'ignore',if ~isnumeric(v155) || numel(v155)==0 || any(isnan(v155))
+v019.message=['The value of options.ignore has an incorrect format.',char(10),'The value should be a numeric vector with HTML error codes.'];
+return,end,case 'verbose',if ~isnumeric(v155) || numel(v155)~=1 || double(v155)~=round(double(v155))
+v019.message='The value of options.verbose is not an integer scalar.';return,end,case 'm_date_r',if ~ischar(v155) || numel(v155)==0
+v019.message='Options.m_date_r should be ''ignore'', ''warning'', or ''error''.';return,end,v194=true;switch lower(v155),case 'ignore'
+v155=0;case 'warning',v155=1;case 'error',v155=2;otherwise,v019.message='Options.m_date_r should be ''ignore'', ''warning'', or ''error''.';
+return,end,v090.m_date_r=v155;case 'flag',if ischar(v155)&&numel(v155)~=0&&~ismember({v155},{'*','id','js','cs','im','if','fw'})
+v019.message='Invalid flag. Must be a char with *, id, js, cs, im, fw, or if.';
+return,end,case 'UseLocalTime',[v156,v090.UseLocalTime]=f22(v155);if ~v156,v019.message='UseLocalTime should be either true or false';
+return,end,case 'UseURLwrite',[v156,v155]=f22(v155);if ~v156,v019.message='UseURLwrite should be either true or false';
+return,end,v090.UseURLwrite=v155 || v151.UseURLwrite;case 'err429',if ~isa(v155,'struct'),v019.message='The err429 parameter should be a struct.';
+return,end,v090.err429=v151.err429;v196=fieldnames(v155);for v003=1:numel(v196),v197=v155.(v196{v003});switch lower(v196{v003})
+case 'countsastry',[v156,v197]=f22(v197);if ~v156,v019.message=['Invalid field CountsAsTry in the err429 parameter: ','should be a logical scalar.'];
+return,end,v090.err429.CountsAsTry=v197;case 'timetowait'
+if ~isnumeric(v197) || numel(v197)~=1,v019.message=['Invalid field TimeToWait in the err429 parameter: ','should be a numeric scalar.'];
+return,end,v090.err429.TimeToWait=double(v197);case 'printatverbositylevel',if ~isnumeric(v197) || numel(v197)~=1 ||double(v197)~=round(double(v197))
+v019.message=['Invalid field PrintAtVerbosityLevel in the err429 ','parameter: should be a scalar double integer.'];
+return,end,v090.err429.PrintAtVerbosityLevel=v197;
+otherwise,warning('HJW:WBM:NameValue_not_found',['Name,Value pair not ','recognized during parsing of err429 parameter: %s'],v196{v003});
+end,end,case 'print_to_fid',if isempty(v155),v090.print_2_fid.boolean=false;else,v090.print_2_fid.boolean=true;try v157=ftell(v155);catch,v157=-1;end
+if v155~=1 && v157==-1,v019.message=['Invalid print_to_fid parameter: ','should be a valid file identifier or 1.'];
+return,end,v090.print_2_fid.fid=v155;end,case 'print_to_obj',if isempty(v155)
+v090.print_2_obj.boolean=false;else,v090.print_2_obj.boolean=true;try v051=get(v155,'String');set(v155,'String','');set(v155,'String',v051);
+v090.print_2_obj.obj=v155;catch,v019.message=['Invalid print_to_obj parameter: ','should be a handle to an object with a writeable String property'];
+return,end,end,case 'print_to_con',[v156,v090.print_2_con]=f22(v155);if ~v156,v019.message='print_to_con should be either true or false';
+return,end,otherwise,v019.message=sprintf('Name,Value pair not recognized: %s',v154);v019.identifier='HJW:WBM:incorrect_input_NameValue';return,end
+end,if ~isfield(v090,'print_2_con') &&( isfield(v090,'print_2_fid') || isfield(v090,'print_2_obj') ),v090.print_2_con=false;end,v150=fieldnames(v151);
+for v141=1:numel(v150),if ~isfield(v090,v150(v141)),v090.(v150{v141})=v151.(v150{v141});end,end,try v198=f31;catch,errordlg(v193.errordlg_text{:})
+v019=v193.ME;return,end,if v090.UseLocalTime,v199=v198-now;v199=round(v199*24*4)/(24*4);v090.date_bounds.datenum=v090.date_bounds.datenum-v199;
+v184=v090.date_bounds.datenum;else,v184=v090.date_bounds.datenum;end,v155={datestr(v184(1),'yyyymmddTHHMMSS'),datestr(v184(2),'yyyymmddTHHMMSS')};
+v155{1}(9)='';v155{2}(9)='';v090.date_bounds.double=[str2double(v155{1}) str2double(v155{2})];
+if ~( v184(1)<=v198 && v198<=v184(2) ),v090.tries(2)=0;end,if v090.m_date_r==2 && ~strcmp(v090.flag,'*')
+v019.message=['m_date_r set to ''error'' and the flag set to something other than ''*'' will',' by definition',char(10),'cause an error, as the downloaded pages will not contain',' any dates.',char(10),'See the help text for a work-around for images.'];
+v019.identifier='HJW:WBM:IncompatibleInputs';return,end,if ~v194 && ~strcmp(v090.flag,'*'),v090.m_date_r=0;end,v017=true;v019=[];end
+function v200=f34(v032),v200=false;if ~iscell(v032) || isempty(v032) || size(v032,2)~=3,v200=true;return
+end,for v201=1:size(v032,1),v155=v032{v201,1};v202=numel(v155(2:2:end));if ~ischar(v155) || numel(v155)==0 || ~all(ismember(v155(2:2:end),'12x'))
+v200=true;return,end,v155=v032{v201,2};if ~isa(v155,'double') || numel(v155)~=v202
+v200=true;return,end,v155=v032{v201,3};if ~ischar(v155) || ~ismember({v155},{'load','save','exit','pause_retry'}),v200=true;return,end,end,end
+function v203=f35,persistent v193,if isempty(v193) || v193.boolean
+v193=struct;v193.boolean=true;v193.errordlg_text={{['The WBM function relies on a compiled c function to get the current time in UTC '.';
+'when offline or for Matlab 6.5. The automatic compiling mechanism appears to have '.';
+'failed. Please manually make sure utc_time.c is compiled for your system.'.'].'},'utc_time.c compile failed'};
+	v193.ME.message='Retrieval of UTC failed.';v193.ME.identifier='HJW:WBM:UTC_missing';try if abs(f31-now)>(14.1/24)
+error('HJW:WBM:getUTCfail',['The getUTC function failed,',char(10),'or the ','difference between now() and the UTC time is more than a day.',char(10),'The ','getUTC function requires either internet access or folder write access.'])
+end,catch,errordlg(v193.errordlg_text{:}),error(v193.ME.identifier,v193.ME.message),end,v193.boolean=false;end,v203=v193;end
+
+##### SOURCE END #####
+--></body></html>
