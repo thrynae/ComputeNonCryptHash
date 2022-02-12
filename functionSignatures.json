@@ -1,0 +1,44 @@
+{
+    "_schemaVersion": "1.0.0",
+    "_v_ComputeNonCryptHash":"2.2.0",
+    "ComputeNonCryptHash":
+    {
+        "inputs":
+        [
+            {"mutuallyExclusiveGroup":
+             [
+                 [
+                     {"name":"data", "kind":"required",
+                      "purpose":"Data to be hashed"},
+                     {"name":"HashLength", "kind":"flag", "type":["numeric","scalar"],
+                      "purpose":"Number of bits in the hash"},
+                     {"name":"VersionFlag", "kind":"flag", "type":[["char","row","choices={'-v1','-v2'}"],["string","scalar","choices={\"-v1\",\"-v2\"}"]],
+                      "purpose":"Select specific algorithm version"},
+                     {"name":"OptionStruct", "kind":"flag", "type":["struct"],
+                      "purpose":"Struct containing the options"}
+                 ],
+                 [
+                     {"name":"data", "kind":"required",
+                      "purpose":"Data to be hashed"},
+                     {"name":"HashLength", "kind":"flag", "type":["numeric","scalar"],
+                      "purpose":"Number of bits in the hash"},
+                     {"name":"VersionFlag", "kind":"flag", "type":[["char","row","choices={'-v1','-v2'}"],["string","scalar","choices={\"-v1\",\"-v2\"}"]],
+                      "purpose":"Select specific algorithm version"},
+                     {"name":"HashLength", "kind":"namevalue", "type":["numeric","scalar"],
+                      "purpose":"Number of bits in the hash"},
+                     {"name":"VersionFlag", "kind":"namevalue", "type":[["char","row","choices={'-v1','-v2'}"],["string","scalar","choices={\"-v1\",\"-v2\"}"]],
+                      "purpose":"Select specific algorithm version"},
+                     {"name":"print_to_con",        "kind":"namevalue", "type":["logical", "scalar"],
+                      "purpose":"Exception redirection command window flag"},
+                     {"name":"print_to_fid",        "kind":"namevalue", "type":"double",
+                      "purpose":"Exception redirection file identifier"},
+                     {"name":"print_to_obj",        "kind":"namevalue",
+                      "purpose":"Exception redirection object handle"},
+                     {"name":"print_to_fcn",        "kind":"namevalue", "type":[["function_handle"],["inline"]],
+                      "purpose":"Exception redirection function handle"}
+                 ]
+             ]
+            }
+        ]
+    }
+}
